@@ -6,20 +6,20 @@ from typing import Annotated
 warnings.filterwarnings("ignore", message="The default value of `allowed_objects`")
 
 from dotenv import load_dotenv
+from tavily import TavilyClient
+from langgraph.types import Command
+from pydantic import BaseModel,Field
+from langchain_openai import ChatOpenAI
 from langchain_core.documents import Document
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import InjectedToolCallId, tool
-from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, MessagesState, StateGraph,START
 from langgraph.prebuilt import InjectedState, ToolNode, tools_condition
-from langgraph.types import Command
-from pydantic import BaseModel, Field
-from tavily import TavilyClient
-
-from agentic_rag.core.models import ClaimVerificationResult, RelevancyDecision, RouterDecision
 from agentic_rag.core.vector_store import search as vs_search
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from agentic_rag.core.models import ClaimVerificationResult, RelevancyDecision, RouterDecision
+
 load_dotenv()
 
 llm = ChatOpenAI(model="gpt-5.4-mini")
