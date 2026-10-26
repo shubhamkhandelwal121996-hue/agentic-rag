@@ -64,7 +64,7 @@ def get_qdrant_collection_name(session_id: str) -> str:
 
 
 def get_qdrant_vectorstore(session_id: str) -> QdrantVectorStore:
-    collection_name = get_collection_name(session_id)
+    collection_name = get_qdrant_collection_name(session_id)
 
     if not qdrant_client.collection_exists(collection_name):
         qdrant_client.create_collection(
@@ -84,12 +84,12 @@ def get_qdrant_vectorstore(session_id: str) -> QdrantVectorStore:
 
 # ── Public API ───────────────────────────────────────────────────────────────
 
-def add_paper(docs: list[Document], session_id: str) -> None:
-    get_vectorstore(session_id).add_documents(docs)
+def add_research_paper(docs: list[Document], session_id: str) -> None:
+    get_qdrant_vectorstore(session_id).add_documents(docs)
 
 
-def list_papers(session_id: str) -> list[str]:
-    collection_name = get_collection_name(session_id)
+def list_research_papers(session_id: str) -> list[str]:
+    collection_name = get_qdrant_collection_name(session_id)
 
     if not qdrant_client.collection_exists(collection_name):
         return []
@@ -127,7 +127,7 @@ def retrieve_documents(
     k: int = 4,
 ) -> list[Document]:
 
-    vectorstore = get_vectorstore(session_id)
+    vectorstore = get_qdrant_vectorstore(session_id)
 
     retriever = vectorstore.as_retriever(
         search_type="similarity",
