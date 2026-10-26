@@ -1,15 +1,12 @@
-
 import os
 from pathlib import Path
-
 from dotenv import load_dotenv
-from langchain_classic.embeddings import CacheBackedEmbeddings
-from langchain_classic.storage import LocalFileStore
 from langchain_core.documents import Document
+from qdrant_client import QdrantClient,models
 from langchain_openai import OpenAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from langchain_classic.storage import LocalFileStore
+from langchain_classic.embeddings import CacheBackedEmbeddings
 
 
 # ── Environment ─────────────────────────────────────────────────────────────
@@ -63,7 +60,7 @@ qdrant_client = QdrantClient(
 # ── Collection ───────────────────────────────────────────────────────────────
 
 def get_collection_name(session_id: str) -> str:
-    return f"papeer_{session_id.replace('-', '_')}"
+    return f"PaperMind_{session_id.replace('-', '_')}"
 
 
 def get_vectorstore(session_id: str) -> QdrantVectorStore:
@@ -72,9 +69,9 @@ def get_vectorstore(session_id: str) -> QdrantVectorStore:
     if not qdrant_client.collection_exists(collection_name):
         qdrant_client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(
+            vectors_config=models.VectorParams(
                 size=EMBEDDING_DIM,
-                distance=Distance.COSINE,
+                distance=models.Distance.COSINE,
             ),
         )
 
