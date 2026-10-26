@@ -18,17 +18,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import InjectedToolCallId, tool
 from langgraph.graph import END, MessagesState, StateGraph, START
 from langgraph.prebuilt import InjectedState, ToolNode
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage, trim_messages
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from agentic_rag.core.QdrantVector_Store import retrieve_documents as VectorStore_search
 
 load_dotenv()
 
 
-# --------------------------------------------------------------------------- #
-# Structured-output models (merged from agentic_rag/core/models.py)
-# BtwRouteDecision was dropped (never used). RelevancyDecision.reason was dropped
-# because nothing reads it and it costs output tokens on every query.
-# --------------------------------------------------------------------------- #
+# -------------------------------Structured-output models-------------------------------------------- #
 class RouterDecision(BaseModel):
     route: Literal["retrieve", "verify_claim", "direct_answer"]
 
@@ -49,9 +45,7 @@ class ClaimVerificationResult(BaseModel):
     superseding_papers: list[SupersedingPaper]
 
 
-# --------------------------------------------------------------------------- #
-# Shared resources: built once, reused on every call
-# --------------------------------------------------------------------------- #
+# --------------------------------LLM's------------------------------------------- #
 llm = ChatOpenAI(model="gpt-5.4-mini")
 fast_llm = ChatOpenAI(model="gpt-5.4-mini")
 
@@ -102,9 +96,7 @@ def merge_docs(existing: list[Document] | None, new: list[Document]) -> list[Doc
     return merged
 
 
-# --------------------------------------------------------------------------- #
-# Router
-# --------------------------------------------------------------------------- #
+# ---------------------------------Router------------------------------------------ #
 ROUTER_SYSTEM_PROMPT = """
 <role>
 You are a query classification assistant for a research paper question-answering system.
@@ -170,9 +162,7 @@ def router_node(state: RAGState) -> dict:
     }
 
 
-# --------------------------------------------------------------------------- #
-# Tools
-# --------------------------------------------------------------------------- #
+# ---------------------------------Tools------------------------------------------ #
 @tool
 def ResearchPaper_VectorStore(
     query: Annotated[str, Field(description="Question or topic to look for in the research paper collection")],
@@ -279,24 +269,38 @@ Only call a tool to gather context.
 
 
 def agent_node(state: RAGState) -> dict:
-    # trim_messages with start_on="human" never cuts a tool call from its ToolMessage.
-    history = trim_messages(
-        state["messages"],
-        strategy="last",
-        token_counter=len,              # count messages, not tokens (fast, no tokenizer)
-        max_tokens=MAX_HISTORY_MESSAGES,
-        start_on="human",
-        include_system=False,
-    )
+    """Give the tool-calling LLM safe dialogue context, never raw tool traces.
+
+    LangGraph still stores AI tool calls and ToolMessages in `messages` for
+    ToolNode and checkpointing. Only the prompt sent to the model is filtered.
+    """
+    history = []
+    for message in state["messages"]:
+        if isinstance(message, HumanMessage):
+            history.append(message)
+        elif isinstance(message, AIMessage) and not message.tool_calls and message.content:
+            # Completed assistant answers are safe to include as context.
+            history.append(message)
+
+    history = history[-MAX_HISTORY_MESSAGES:]
+    search_query = state.get("search_query") or state["query"]
+
+    # The rewritten search query must be used on a retry, but should not be
+    # inserted into the persisted conversation as a fake HumanMessage.
+    if search_query != state["query"]:
+        history.append(HumanMessage(content=f"Search for: {search_query}"))
+
+    # Ensure a fresh thread always has a user request.
+    if not history:
+        history = [HumanMessage(content=search_query)]
+
     result = llm_with_tools.invoke(
         [{"role": "system", "content": RETRIEVE_SYSTEM_PROMPT}, *history]
     )
     return {"messages": [result]}
 
 
-# --------------------------------------------------------------------------- #
-# Relevancy check (fast model; skipped entirely when nothing was retrieved)
-# --------------------------------------------------------------------------- #
+# ----------------------------------Relevancy Check----------------------------------------- #
 RELEVANCY_CHECK_PROMPT = """
 <role>
 You evaluate whether retrieved document chunks are relevant to a user's question about research papers.
@@ -338,9 +342,8 @@ def relevancy_check_node(state: RAGState) -> dict:
     return {"documents_relevant": result.is_relevant}
 
 
-# --------------------------------------------------------------------------- #
-# Query rewrite (only runs when the relevancy check fails)
-# --------------------------------------------------------------------------- #
+# -------------------------------Query rewrite-------------------------------------------- #
+
 QUERY_REWRITE_PROMPT = """
 <role>
 You are a query rewriting assistant for a research paper retrieval system.
@@ -377,16 +380,13 @@ def query_rewrite_node(state: RAGState) -> dict:
     return {
         # `query` stays as the user's original question for the final answer.
         "search_query": new_query,
-        "messages": [HumanMessage(content=f"The previous search found nothing. Search again using: {new_query}")],
         "retrieved_docs": [],
         "documents_relevant": None,
         "rewrite_count": state.get("rewrite_count", 0) + 1,
     }
 
 
-# --------------------------------------------------------------------------- #
-# Claim verification
-# --------------------------------------------------------------------------- #
+# ------------------------------Claim Verification--------------------------------------------- #
 CLAIM_ANALYSIS_PROMPT = """
 <role>
 You are a literature-review assistant who checks whether a research finding
@@ -468,9 +468,7 @@ def verify_claim_node(state: RAGState) -> dict:
     }
 
 
-# --------------------------------------------------------------------------- #
-# Answer generation
-# --------------------------------------------------------------------------- #
+# -------------------------------Answer Generation-------------------------------- #
 ANSWER_SYSTEM_PROMPT = (
     "<role>You answer using only the evidence provided.</role>\n"
     "<rules>\n"
@@ -533,9 +531,7 @@ def generate_answer_node(state: RAGState) -> dict:
     return {"final_answer": answer, "messages": [AIMessage(content=answer)]}
 
 
-# --------------------------------------------------------------------------- #
-# Edges
-# --------------------------------------------------------------------------- #
+# ----------------------------Edges----------------------------------------------- #
 def route_by_intent(state: RAGState) -> str:
     return state.get("selected_route") or "direct_answer"
 

@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "beautifulsoup4>=4.15.0",
     "chromadb>=1.5.9",
     "langchain>=1.4.4",
     "langchain-community>=0.4.2",
@@ -13,8 +14,10 @@ dependencies = [
     "langchain-qdrant>=1.1.0",
     "langgraph>=1.2.14",
     "langgraph-checkpoint-sqlite>=3.1.1",
+    "pymupdf>=2.0",
     "pypdf>=6.19.0",
     "python-dotenv>=1.2.4",
+    "streamlit>=1.66.1",
     "tavily-python>=0.8.5",
 ]
 
