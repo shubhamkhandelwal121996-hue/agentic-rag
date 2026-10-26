@@ -19,7 +19,7 @@ from langchain_core.tools import InjectedToolCallId, tool
 from langgraph.graph import END, MessagesState, StateGraph, START
 from langgraph.prebuilt import InjectedState, ToolNode
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage, trim_messages
-from agentic_rag.core.vector_store import search as VectorStore_search
+from agentic_rag.core.QdrantVector_Store import retrieve_documents as VectorStore_search
 
 load_dotenv()
 

@@ -59,11 +59,11 @@ qdrant_client = QdrantClient(
 
 # ── Collection ───────────────────────────────────────────────────────────────
 
-def get_collection_name(session_id: str) -> str:
+def get_qdrant_collection_name(session_id: str) -> str:
     return f"PaperMind_{session_id.replace('-', '_')}"
 
 
-def get_vectorstore(session_id: str) -> QdrantVectorStore:
+def get_qdrant_vectorstore(session_id: str) -> QdrantVectorStore:
     collection_name = get_collection_name(session_id)
 
     if not qdrant_client.collection_exists(collection_name):
@@ -121,12 +121,17 @@ def list_papers(session_id: str) -> list[str]:
     return titles
 
 
-def search(
+def retrieve_documents(
     query: str,
     session_id: str,
     k: int = 4,
 ) -> list[Document]:
-    return get_vectorstore(session_id).similarity_search(
-        query,
-        k=k,
+
+    vectorstore = get_vectorstore(session_id)
+
+    retriever = vectorstore.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": k}
     )
+
+    return retriever.invoke(query)
