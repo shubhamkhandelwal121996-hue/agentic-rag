@@ -1,9 +1,4 @@
 {
-  "5abb480c-78f2-489b-9e9f-7ce660247cd1": {
-    "title": "New research chat",
-    "created": "2026-10-26T16:23:03.805485+00:00",
-    "messages": []
-  },
   "d81173b3-0165-4e2c-a9bd-16fc8c75bb7b": {
     "title": "what is inside this uploaded report?",
     "created": "2026-10-26T16:30:54.667031+00:00",
@@ -90,6 +85,96 @@
           "retrieved_passages": 5,
           "query_rewrites": 0,
           "relevant": true
+        }
+      }
+    ]
+  },
+  "37bb574c-73b2-4a9c-b117-05595a479ded": {
+    "title": "Attention is all you need",
+    "created": "2026-10-28T08:21:23.572631+00:00",
+    "messages": [
+      {
+        "role": "user",
+        "content": "tell me about this uploaded paper summary in 50 wrods"
+      },
+      {
+        "role": "assistant",
+        "content": "The paper presents the Transformer, a sequence transduction model based entirely on attention, replacing recurrent layers with multi-headed self-attention. It trains faster than recurrent or convolutional architectures on translation tasks and achieves state-of-the-art results on WMT 2014 English-German and English-French. The authors also plan to extend it beyond text. [1]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "is there any new research who superseded this"
+      },
+      {
+        "role": "assistant",
+        "content": "## Claim check\nClaim: is there any new research who superseded this\nVerdict: The provided search results do not identify a specific research claim, and none of the listed papers clearly overturn or supersede it. Based on the evidence shown, there is no basis to say the claim has been superseded.\n\nNo newer work that challenges this claim was found.",
+        "details": {
+          "route": "verify_claim",
+          "retrieved_passages": 0,
+          "query_rewrites": 0,
+          "relevant": null
+        }
+      },
+      {
+        "role": "user",
+        "content": "ok who are main founder of this paper"
+      },
+      {
+        "role": "assistant",
+        "content": "The provided evidence does not identify the paper\u2019s \u201cmain founder(s).\u201d It only mentions authors and contributors such as Niki, Llion, Lukasz, and Aidan, but it does not say who founded the paper [1].",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 5,
+          "query_rewrites": 1,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "tell me all authors name"
+      },
+      {
+        "role": "assistant",
+        "content": "The authors named in the evidence are: Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, \u0141ukasz Kaiser, and Illia Polosukhin. [1]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "who build llm using this paper first?"
+      },
+      {
+        "role": "assistant",
+        "content": "The evidence does not say who first built an LLM using this paper. [1][2][3][4][5]\n\nIt only says that Jakob proposed replacing RNNs with self-attention, and that Ashish and Illia designed and implemented the first Transformer models, with Noam proposing key attention mechanisms. [5]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 5,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "what is self attention?"
+      },
+      {
+        "role": "assistant",
+        "content": "Self-attention is a mechanism that lets a model decide how much each part of an input should \u201cpay attention\u201d to every other part.\n\n### Intuition\nIf you have a sentence like:\n\n> \u201cThe animal didn\u2019t cross the street because **it** was tired.\u201d\n\nTo understand what \u201cit\u201d refers to, the model needs to look at other words in the sentence. Self-attention helps each word gather information from the other words that are most relevant.\n\n### How it works, simply\nFor each token/word, the model computes:\n- **Query**: what this token is looking for\n- **Key**: what each other token offers\n- **Value**: the information each token carries\n\nThen it compares the query of one token with the keys of all tokens to get attention weights, and uses those weights to blend the values.\n\n### Why it\u2019s useful\n- Captures relationships between distant words\n- Works in parallel, unlike older sequential models\n- Helps transformers understand context better\n\n### In one sentence\nSelf-attention is a way for a model to dynamically weight other parts of the same input to build a context-aware representation of each token.\n\nIf you want, I can also show a tiny numeric example or a diagram.",
+        "details": {
+          "route": "direct_answer",
+          "retrieved_passages": 0,
+          "query_rewrites": 0,
+          "relevant": null
         }
       }
     ]

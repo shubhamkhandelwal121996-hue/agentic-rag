@@ -15,23 +15,143 @@ if SRC.is_dir() and str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from agentic_rag.core.QdrantVector_Store import add_research_paper, list_research_papers
+
+try:
+    from agentic_rag.core.QdrantVector_Store import delete_session
+except ImportError:
+    # Add delete_session(session_id) to your Qdrant module to also remove a
+    # deleted chat's indexed papers. Until then they stay in Qdrant.
+    delete_session = None
+
 from agentic_rag.core.Agentic_rag1 import build_graph
 from agentic_rag.core.rag_loaders import load_arxiv, load_document
 
-st.set_page_config(page_title="PaperMind", page_icon="🧠", layout="wide")
+# "centered" keeps the chat column and the input box aligned and readable.
+st.set_page_config(page_title="🧠PaperMind", page_icon="🧠", layout="centered")
+
+# --------------------------------------------------------------------------- #
+# Styling
+# --------------------------------------------------------------------------- #
+st.markdown(
+    """
+    <style>
+    :root {
+        --pm-accent: #4F46E5;
+        --pm-border: rgba(255, 255, 255, 0.09);
+        color-scheme: dark;
+    }
+
+    /* Theme: dark navy page, slightly lighter sidebar, transparent top bar.
+       Built for Streamlit's Dark theme (menu > Settings > Theme). */
+    .stApp { background: #0B1020; color: #E5E7EB; }
+    [data-testid="stSidebar"] { background: #131A2E; }
+    [data-testid="stHeader"] { background: transparent; }
+
+    /* Hide the "Deploy" button; the ⋮ menu stays. */
+    [data-testid="stAppDeployButton"], .stDeployButton { display: none !important; }
+
+    /* Slightly wider than Streamlit's default centered column. The input box
+       gets the same width so the two stay aligned. */
+    [data-testid="stMainBlockContainer"],
+    [data-testid="stBottomBlockContainer"] {
+        max-width: 880px !important;
+    }
+    [data-testid="stMainBlockContainer"] { padding-top: 2.5rem; }
+
+    /* Title */
+    .pm-title {
+        font-size: 2.1rem; font-weight: 800; line-height: 1.2;
+        letter-spacing: -0.02em; margin: 0 0 0.2rem 0;
+    }
+    .pm-gradient {
+        background: linear-gradient(90deg, #818CF8, #C084FC, #F472B6);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .pm-tagline {
+        color: rgba(250, 250, 250, 0.6); font-size: 0.95rem; margin-bottom: 1.5rem;
+    }
+
+    /* Chat bubbles: rounded cards, with the user's messages tinted */
+    [data-testid="stChatMessage"] {
+        border: 1px solid var(--pm-border);
+        border-radius: 16px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 0.9rem;
+        background: rgba(255, 255, 255, 0.02);
+    }
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+        background: rgba(79, 70, 229, 0.10);
+        border-color: rgba(99, 102, 241, 0.30);
+    }
+
+    /* Rounded buttons in the sidebar */
+    [data-testid="stSidebar"] .stButton > button { border-radius: 10px; }
+
+    /* Active chat (Streamlit "primary" buttons): indigo instead of default red.
+       Both selectors are listed because Streamlit renamed the attribute
+       between versions. */
+    button[kind="primary"],
+    button[data-testid="stBaseButton-primary"] {
+        background-color: #4F46E5; border-color: #4F46E5; color: #FFFFFF;
+    }
+    button[kind="primary"]:hover,
+    button[data-testid="stBaseButton-primary"]:hover {
+        background-color: #4338CA; border-color: #4338CA; color: #FFFFFF;
+    }
+    button[kind="primary"]:focus:not(:active),
+    button[data-testid="stBaseButton-primary"]:focus:not(:active) {
+        border-color: #6366F1; box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.5);
+        color: #FFFFFF;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 DATA_DIR = ROOT / ".papermind"
 DATA_DIR.mkdir(exist_ok=True)
 CHAT_FILE = DATA_DIR / "chats.json"
 
+DEFAULT_TITLE = "New Chat"
+LEGACY_TITLE = "New research chat"  # title used by chats saved before the rename
 
+# Shown as one-click starters on an empty chat.
+EXAMPLE_PROMPTS = [
+    ("📝 Summarize", "Summarize the paper in 50 words"),
+    ("🔬 Key results", "What are the key contributions and results of this paper?"),
+    ("🔎 Still current?", "Has the main claim of this paper been superseded by newer research?"),
+]
+
+# Progress messages, one per graph node (reported after the node finishes).
+STEP_LABELS = {
+    "router": "Understood your question",
+    "agent": "Chose a search tool",
+    "tools": "Searched your sources",
+    "relevancy_check": "Checked how relevant the results are",
+    "query_rewrite": "Rewrote the query and searched again",
+    "verify_claim": "Checked for newer research",
+    "generate_answer": "Wrote the answer",
+}
+
+# --------------------------------------------------------------------------- #
+# Chat storage
+# --------------------------------------------------------------------------- #
 def read_chats() -> dict:
     """Load locally persisted chat display data; graph state lives in SQLite."""
     try:
         data = json.loads(CHAT_FILE.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else {}
     except (OSError, ValueError):
         return {}
+
+    chats = data if isinstance(data, dict) else {}
+
+    # Old saved chats still carry the previous default title; migrate them so
+    # the sidebar and the auto-rename on first question both use the new name.
+    for info in chats.values():
+        if isinstance(info, dict) and info.get("title") == LEGACY_TITLE:
+            info["title"] = DEFAULT_TITLE
+    return chats
 
 
 def persist_chats() -> None:
@@ -44,7 +164,7 @@ def persist_chats() -> None:
 def create_chat() -> str:
     chat_id = str(uuid.uuid4())
     st.session_state.chats[chat_id] = {
-        "title": "New research chat",
+        "title": DEFAULT_TITLE,
         "created": datetime.now(timezone.utc).isoformat(),
         "messages": [],
     }
@@ -58,6 +178,48 @@ def graph():
     return build_graph(str(ROOT / "checkpoints.db"))
 
 
+def rename_chat(chat_to_rename: str, new_title: str) -> None:
+    title = " ".join(new_title.split())[:60]
+    if title and chat_to_rename in st.session_state.chats:
+        st.session_state.chats[chat_to_rename]["title"] = title
+        persist_chats()
+
+
+def delete_chat(chat_to_delete: str) -> None:
+    """Remove a chat's indexed papers, LangGraph history and saved messages."""
+    problems = []
+
+    if delete_session is not None:
+        try:
+            delete_session(chat_to_delete)
+        except Exception as exc:
+            problems.append(f"indexed papers could not be removed ({exc})")
+
+    try:
+        graph().checkpointer.delete_thread(chat_to_delete)
+    except Exception as exc:
+        problems.append(f"conversation memory could not be cleared ({exc})")
+
+    st.session_state.chats.pop(chat_to_delete, None)
+
+    if st.session_state.active_chat == chat_to_delete:
+        remaining = st.session_state.chats
+        if remaining:
+            st.session_state.active_chat = max(
+                remaining, key=lambda cid: remaining[cid].get("created", "")
+            )
+        else:
+            create_chat()  # never leave the app without an active chat
+
+    persist_chats()
+
+    if problems:
+        st.session_state.notice = "Chat deleted, but " + "; ".join(problems) + "."
+
+
+# --------------------------------------------------------------------------- #
+# Ingestion and question answering
+# --------------------------------------------------------------------------- #
 def ingest_documents(docs: list, chat_id: str) -> int:
     if not docs:
         raise ValueError("The source contains no extractable text.")
@@ -84,23 +246,50 @@ def upload_file(file, chat_id: str) -> int:
             temporary_path.unlink(missing_ok=True)
 
 
-def ask_papermind(question: str, chat_id: str) -> tuple[str, dict]:
-    """Reuse a stable LangGraph thread for each research chat."""
+def ask_papermind(question: str, chat_id: str, on_step=None) -> str:
+    """Run the graph on a stable thread per chat, reporting each finished step."""
     config = {"configurable": {"thread_id": chat_id}}
-    result = graph().invoke(
-        {"messages": [HumanMessage(content=question)], "session_id": chat_id},
-        config=config,
-    )
-    answer = result.get("final_answer") or "No answer was generated."
-    details = {
-        "route": result.get("selected_route"),
-        "retrieved_passages": len(result.get("retrieved_docs") or []),
-        "query_rewrites": result.get("rewrite_count", 0),
-        "relevant": result.get("documents_relevant"),
-    }
-    return answer, details
+    inputs = {"messages": [HumanMessage(content=question)], "session_id": chat_id}
+
+    # Streaming drives the live progress; the full final state is then read
+    # back from the checkpoint, so nothing has to be merged by hand.
+    for update in graph().stream(inputs, config=config, stream_mode="updates"):
+        if on_step is not None:
+            for node in update:
+                on_step(STEP_LABELS.get(node, node))
+
+    result = graph().get_state(config).values
+    return result.get("final_answer") or "No answer was generated."
 
 
+# --------------------------------------------------------------------------- #
+# UI helpers
+# --------------------------------------------------------------------------- #
+def welcome_card(has_papers: bool) -> None:
+    """Empty-chat starter: one-click example questions."""
+    with st.container(border=True):
+        st.markdown("### Ask your papers anything")
+        if has_papers:
+            st.caption("Your papers are indexed. Try one of these, or type your own question below.")
+        else:
+            st.caption("Add a paper from the sidebar first, then try one of these.")
+
+        columns = st.columns(len(EXAMPLE_PROMPTS))
+        for column, (label, prompt) in zip(columns, EXAMPLE_PROMPTS):
+            if column.button(
+                label,
+                key=f"example_{label}",
+                help=prompt,
+                disabled=not has_papers,
+                use_container_width=True,
+            ):
+                st.session_state.pending_question = prompt
+                st.rerun()
+
+
+# --------------------------------------------------------------------------- #
+# Session setup
+# --------------------------------------------------------------------------- #
 if "chats" not in st.session_state:
     st.session_state.chats = read_chats()
 if "active_chat" not in st.session_state:
@@ -114,26 +303,56 @@ if "active_chat" not in st.session_state:
 
 chat_id = st.session_state.active_chat
 
+# --------------------------------------------------------------------------- #
+# Sidebar
+# --------------------------------------------------------------------------- #
 with st.sidebar:
-    st.header("📚 PaperMind")
-    if st.button("＋ New research chat", use_container_width=True):
+    st.header("🧠 PaperMind")
+    if st.button("＋ New Chat", use_container_width=True):
         create_chat()
         st.rerun()
 
     st.subheader("Conversations")
+
+    notice = st.session_state.pop("notice", None)
+    if notice:
+        st.warning(notice)
+
     for cid, info in sorted(
         st.session_state.chats.items(),
         key=lambda entry: entry[1].get("created", ""),
         reverse=True,
     ):
-        if st.button(
-            info.get("title", "Research chat"),
+        title = info.get("title", DEFAULT_TITLE)
+        select_col, menu_col = st.columns([5, 1], gap="small")
+
+        if select_col.button(
+            title,
             key=f"chat_{cid}",
             type="primary" if cid == chat_id else "secondary",
             use_container_width=True,
         ):
             st.session_state.active_chat = cid
             st.rerun()
+
+        # Opening this menu and then clicking Delete is the confirmation step.
+        with menu_col.popover("⋯", use_container_width=True):
+            new_title = st.text_input(
+                "Rename chat",
+                value=title,
+                max_chars=60,
+                # Title in the key so the box refreshes when the chat is auto-named.
+                key=f"rename_{cid}_{title}",
+            )
+            if st.button("Save name", key=f"save_{cid}", use_container_width=True):
+                rename_chat(cid, new_title)
+                st.rerun()
+
+            st.divider()
+            st.caption("Deleting also removes this chat's messages and indexed papers.")
+            if st.button("🗑️ Delete chat", key=f"delete_{cid}", use_container_width=True):
+                delete_chat(cid)
+                st.rerun()
 
     st.divider()
     st.subheader("Add research material")
@@ -188,8 +407,10 @@ with st.sidebar:
 
     st.divider()
     st.subheader("Papers in this chat")
+    has_papers = False
     try:
         titles = list_research_papers(chat_id)
+        has_papers = bool(titles)
         if titles:
             for title in titles:
                 st.caption(f"📄 {title}")
@@ -198,12 +419,25 @@ with st.sidebar:
     except Exception as exc:
         st.warning(f"Unable to list papers: {exc}")
 
-st.title("PaperMind")
-st.caption("Research paper Q&A · Live web research · Claim verification")
+# --------------------------------------------------------------------------- #
+# Main area
+# --------------------------------------------------------------------------- #
+st.markdown(
+    '<div class="pm-title">🧠 <span class="pm-gradient">PaperMind</span></div>'
+    '<div class="pm-tagline">Research paper Q&amp;A · Live web research · Claim verification</div>',
+    unsafe_allow_html=True,
+)
 
 current_chat = st.session_state.chats[chat_id]
-if not current_chat["messages"]:
-    st.info("Upload research material in the sidebar, or ask a question to begin.")
+
+# The input is read up front so the welcome card can hide as soon as a question
+# arrives (typed, or clicked from an example). The box itself stays pinned to
+# the bottom of the page wherever it is called.
+typed_question = st.chat_input("Ask about a paper, recent research, or a claim...")
+question = st.session_state.pop("pending_question", None) or typed_question
+
+if not current_chat["messages"] and not question:
+    welcome_card(has_papers)
 
 for message in current_chat["messages"]:
     with st.chat_message(
@@ -211,31 +445,36 @@ for message in current_chat["messages"]:
         avatar=":material/person:" if message["role"] == "user" else ":material/psychology:",
     ):
         st.markdown(message["content"])
-        if message["role"] == "assistant" and message.get("details"):
-            with st.expander("How this answer was produced"):
-                st.json(message["details"])
 
-if question := st.chat_input("Ask about a paper, recent research, or a claim..."):
+if question:
     with st.chat_message("user", avatar=":material/person:"):
         st.markdown(question)
 
     with st.chat_message("assistant", avatar=":material/psychology:"):
         try:
-            with st.spinner("Researching..."):
-                answer, details = ask_papermind(question, chat_id)
+            with st.status("Researching…", expanded=True) as status:
+                try:
+                    answer = ask_papermind(
+                        question,
+                        chat_id,
+                        on_step=lambda label: status.write(f"✓ {label}"),
+                    )
+                except Exception:
+                    status.update(label="Something went wrong", state="error", expanded=False)
+                    raise
+                status.update(label="Done", state="complete", expanded=False)
+
             st.markdown(answer)
-            with st.expander("How this answer was produced"):
-                st.json(details)
         except Exception as exc:
             st.error(f"PaperMind could not complete the request: {exc}")
         else:
             current_chat["messages"].extend(
                 [
                     {"role": "user", "content": question},
-                    {"role": "assistant", "content": answer, "details": details},
+                    {"role": "assistant", "content": answer},
                 ]
             )
-            if current_chat["title"] == "New research chat":
+            if current_chat["title"] == DEFAULT_TITLE:
                 current_chat["title"] = " ".join(question.split()[:6])[:60]
             persist_chats()
             st.rerun()

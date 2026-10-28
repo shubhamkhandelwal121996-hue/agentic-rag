@@ -121,6 +121,17 @@ def list_research_papers(session_id: str) -> list[str]:
     return titles
 
 
+def delete_session(session_id: str) -> None:
+    """Delete a chat's Qdrant collection, which removes all of its indexed papers.
+
+    Safe to call when the chat never indexed anything (no collection exists).
+    """
+    collection_name = get_qdrant_collection_name(session_id)
+
+    if qdrant_client.collection_exists(collection_name):
+        qdrant_client.delete_collection(collection_name)
+
+
 def retrieve_documents(
     query: str,
     session_id: str,
