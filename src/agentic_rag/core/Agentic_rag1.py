@@ -169,7 +169,6 @@ def ResearchPaper_VectorStore(
     session_id: Annotated[str, InjectedState("session_id")],
     existing_docs: Annotated[list, InjectedState("retrieved_docs")],
     tool_call_id: Annotated[str, InjectedToolCallId],
-    k: Annotated[int, Field( default=3, ge=1, le=8, description="Maximum number of relevant text chunks to return")],
 ) -> Command:
     """Research paper vector store containing the uploaded papers.
 
@@ -178,7 +177,7 @@ def ResearchPaper_VectorStore(
     Do NOT use it for current events, recent developments, or anything that
     would not appear in the uploaded papers; use the web_search tool for those."""
 
-    documents = VectorStore_search(query=query, session_id=session_id, k=k)
+    documents = VectorStore_search(query=query, session_id=session_id, k=4)
 
     if not documents:
         msg = "No relevant passages were found in the uploaded papers."
@@ -229,10 +228,6 @@ TOOLS = [ResearchPaper_VectorStore, web_search]
 llm_with_tools = llm.bind_tools(TOOLS, parallel_tool_calls=False)
 tool_node = ToolNode(TOOLS)
 
-# --------------------------------------------------------------------------- #
-# Retrieval agent (runs once per retrieval cycle: it picks a tool, the tool
-# runs, then the graph moves on without a second "should I stop?" LLM call)
-# --------------------------------------------------------------------------- #
 RETRIEVE_SYSTEM_PROMPT = """
 <role>
 You are a context-gathering agent for a research paper Q&A system.
@@ -244,7 +239,6 @@ Your only job is to collect the information needed to answer the user's question
 Searches the research papers uploaded in this session.
 Parameters you control:
 - query: a search phrase that matches how the papers would word the answer
-- k: number of passages to return (1-8). Use 2-3 for narrow questions, 5-8 for broad ones.
 </ResearchPaper_VectorStore>
 
 <web_search>
@@ -269,11 +263,7 @@ Only call a tool to gather context.
 
 
 def agent_node(state: RAGState) -> dict:
-    """Give the tool-calling LLM safe dialogue context, never raw tool traces.
-
-    LangGraph still stores AI tool calls and ToolMessages in `messages` for
-    ToolNode and checkpointing. Only the prompt sent to the model is filtered.
-    """
+    """Select a retrieval tool using the conversation context."""
     history = []
     for message in state["messages"]:
         if isinstance(message, HumanMessage):
@@ -285,12 +275,11 @@ def agent_node(state: RAGState) -> dict:
     history = history[-MAX_HISTORY_MESSAGES:]
     search_query = state.get("search_query") or state["query"]
 
-    # The rewritten search query must be used on a retry, but should not be
-    # inserted into the persisted conversation as a fake HumanMessage.
+     # Use the rewritten query without changing the stored conversation.
     if search_query != state["query"]:
         history.append(HumanMessage(content=f"Search for: {search_query}"))
 
-    # Ensure a fresh thread always has a user request.
+     # Handle cases where no conversation history is available.
     if not history:
         history = [HumanMessage(content=search_query)]
 
@@ -525,7 +514,7 @@ def generate_answer_node(state: RAGState) -> dict:
             lines.append("\nNo newer work that challenges this claim was found.")
         answer = "\n".join(lines)
 
-    else:  # direct_answer, or any unknown route
+    else:  # direct_answer
         answer = llm.invoke([{"role": "user", "content": question}]).content
 
     return {"final_answer": answer, "messages": [AIMessage(content=answer)]}

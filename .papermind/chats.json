@@ -176,7 +176,44 @@
           "query_rewrites": 0,
           "relevant": null
         }
+      },
+      {
+        "role": "user",
+        "content": "what is multi head self attention"
+      },
+      {
+        "role": "assistant",
+        "content": "**Multi-head self-attention** is a mechanism used in Transformers that lets a model look at different parts of a sequence at the same time and learn multiple kinds of relationships between tokens.\n\n### Self-attention\nFor each token, the model asks:\n- Which other tokens in the sequence are relevant to me?\n- How much attention should I pay to each one?\n\nIt does this by computing:\n- **Query (Q)**: what this token is looking for\n- **Key (K)**: what each token offers\n- **Value (V)**: the information to combine\n\nThe attention score between tokens is based on how well the query matches the keys.\n\n### Why \u201cmulti-head\u201d?\nInstead of doing this once, the model does it **several times in parallel** with different learned projections. Each \u201chead\u201d can focus on different patterns, such as:\n- syntax\n- long-range dependencies\n- coreference\n- nearby context\n\nThen the outputs of all heads are combined.\n\n### Intuition\nIf a word like **\u201cit\u201d** appears in a sentence, one head might focus on the noun it refers to, while another head might focus on the surrounding verb or subject structure.\n\n### In short\nMulti-head self-attention =  \n**multiple parallel self-attention operations that let the model capture different relationships in the same sequence.**\n\nIf you want, I can also show:\n1. a simple formula,  \n2. a small numerical example, or  \n3. a diagram-like explanation."
+      },
+      {
+        "role": "user",
+        "content": "ok who build CHATGPT?"
+      },
+      {
+        "role": "assistant",
+        "content": "ChatGPT was built by **OpenAI**, an AI research and deployment company.\n\nIt was developed by a team of researchers, engineers, and product people at OpenAI, rather than by one single person. If you want, I can also tell you **who founded OpenAI** or give a **short history of how ChatGPT was made**."
+      },
+      {
+        "role": "user",
+        "content": "WHAT IS attention score?"
+      },
+      {
+        "role": "assistant",
+        "content": "An **attention score** is a number that tells a model **how much focus to give one piece of information when looking at another piece**.\n\n### In simple terms\nIf a model is reading a sentence, attention scores help it decide:\n- which words are most relevant to the current word\n- how strongly each word should influence the output\n\n### Example\nIn the sentence:\n\n> \u201cThe cat sat on the mat because it was tired.\u201d\n\nTo understand what **\u201cit\u201d** refers to, the model may give higher attention scores to **\u201ccat\u201d** than to other words.\n\n### In transformers\nAttention scores are usually computed by comparing:\n- a **query** vector\n- with **key** vectors\n\nThe result is a score showing relevance. These scores are then turned into weights, often using **softmax**, so they sum to 1.\n\n### Why it matters\nAttention scores let models:\n- capture relationships between words far apart\n- focus on important parts of the input\n- improve understanding and prediction\n\nIf you want, I can also explain **attention scores with a math formula** or with a **visual example**."
+      },
+      {
+        "role": "user",
+        "content": "explain math"
+      },
+      {
+        "role": "assistant",
+        "content": "Math is the study of patterns, quantities, shapes, and relationships. It\u2019s a way of describing and understanding the world using numbers, symbols, and logic.\n\n## Big areas of math\n- **Arithmetic**: basic operations like add, subtract, multiply, divide\n- **Algebra**: uses symbols like \\(x\\) to represent unknowns\n- **Geometry**: shapes, sizes, angles, and \u10e1\u10d8\u10d5\u10e0\u10eae\n- **Statistics**: collecting and interpreting data\n- **Calculus**: change and motion, like slopes and rates\n- **Probability**: chance and uncertainty\n\n## Simple example\nIf you have 3 apples and get 2 more:\n\\[\n3 + 2 = 5\n\\]\nThat\u2019s math.\n\n## Why math matters\n- Helps with everyday life: money, shopping, cooking\n- Used in science and engineering\n- Helps solve problems logically\n- Powers technology, computers, and AI\n\n## In one sentence\nMath is the language of patterns and problem-solving.\n\nIf you want, I can also explain math for:\n- kids\n- beginners\n- school homework\n- a specific topic like algebra or calculus"
       }
     ]
+  },
+  "7931d0ac-8db0-4f18-8d5f-552b25530a52": {
+    "title": "New Chat",
+    "created": "2026-10-28T11:28:47.041284+00:00",
+    "messages": []
   }
 }

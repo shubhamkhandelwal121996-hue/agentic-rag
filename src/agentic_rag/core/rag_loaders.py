@@ -20,33 +20,28 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logger = logging.getLogger(__name__)
 
-# --------------------------------------------------------------------------- #
-# Config
-# --------------------------------------------------------------------------- #
+# ----------------------------------HTTP requests and URL validation----------------------------------------- #
 CHUNK_SIZE = 900
 CHUNK_OVERLAP = 200
 
-REQUEST_TIMEOUT = 30            # web pages and arXiv API calls
+REQUEST_TIMEOUT = 30            # web and arXiv API requests
 PDF_TIMEOUT = 60                # PDF downloads
-MAX_RETRIES = 2                 # extra attempts on 429 / 5xx / network errors
+MAX_RETRIES = 2                 # retries for temporary request failures
 MAX_DOWNLOAD_BYTES = 50 * 1024 * 1024
 USER_AGENT = "AgenticRAG/1.0"
 
 ALLOW_PRIVATE_URLS = os.getenv("ALLOW_PRIVATE_URLS", "").lower() in {"1", "true", "yes"}
 
-# A PDF page with fewer characters than this counts as "no text" (likely scanned).
+# Minimum text length used to flag potentially scanned pages.
 MIN_PAGE_CHARS = 50
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 _ATOM = {"atom": "http://www.w3.org/2005/Atom"}
 
-# Only these loader fields are kept on each chunk. PyMuPDF adds ~15 extra keys
-# (producer, creator, format, ...) that bloat every Qdrant payload for no use.
+# Keep only the metadata needed for retrieval and source tracking.
 KEPT_METADATA = ("page", "start_index")
 
-# New-style (2301.12345) and old-style (hep-th/9901001, math.GT/0309136) IDs.
-# The lookbehind stops a match inside a longer number; the version suffix is
-# matched but left outside the capture group, so it is stripped automatically.
+# Match both modern and legacy arXiv IDs without version suffixes.
 _ARXIV_ID = r"(?:\d{4}\.\d{4,5}|[a-z\-]+(?:\.[A-Z]{2})?/\d{7})"
 ARXIV_ID_PATTERN = re.compile(rf"(?<![\w.])({_ARXIV_ID})(?:v\d+)?\b")
 ARXIV_URL_PATTERN = re.compile(r"^https?://(?:www\.)?arxiv\.org/(?:abs|pdf)/", re.I)
@@ -61,17 +56,9 @@ _md_splitter = RecursiveCharacterTextSplitter.from_language(
     add_start_index=True,
 )
 
-# --------------------------------------------------------------------------- #
-# Safe HTTP: SSRF guard, size cap, retries
-# --------------------------------------------------------------------------- #
+# ---------------------------------HTTP requests and URL validation------------------------------------------ #
 def _assert_public_url(url: str) -> None:
-    """Reject URLs that resolve to private, loopback or link-local addresses.
-
-    Without this, a user-supplied URL can reach internal services or a cloud
-    metadata endpoint (http://169.254.169.254/...). Known gap: a DNS record
-    that changes between this check and the actual request (DNS rebinding)
-    is not covered.
-    """
+    """Reject URLs that resolve to non-public IP addresses."""
     if ALLOW_PRIVATE_URLS:
         return
 
@@ -91,7 +78,7 @@ def _assert_public_url(url: str) -> None:
 
 
 class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
-    """Re-run the SSRF check on every redirect hop."""
+    """Check redirected URLs before following them."""
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         _assert_public_url(newurl)
@@ -102,7 +89,7 @@ _opener = urllib.request.build_opener(_SafeRedirectHandler)
 
 
 def _http_get(url: str, timeout: int, max_bytes: int = MAX_DOWNLOAD_BYTES) -> bytes:
-    """GET with a User-Agent, size cap, SSRF check and retry/backoff."""
+    """Fetch a URL with retries, timeouts, and download limits."""
     _assert_public_url(url)
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
 
@@ -119,27 +106,19 @@ def _http_get(url: str, timeout: int, max_bytes: int = MAX_DOWNLOAD_BYTES) -> by
         except (urllib.error.URLError, TimeoutError):
             if attempt == MAX_RETRIES:
                 raise
-        time.sleep(2 ** attempt)  # 1s, then 2s
+        time.sleep(2 ** attempt)
 
-    raise RuntimeError("unreachable")  # loop always returns or raises
+    raise RuntimeError("unreachable") 
 
 
-# --------------------------------------------------------------------------- #
-# Text cleaning and chunking
-# --------------------------------------------------------------------------- #
-_HYPHEN_BREAK = re.compile(r"(?<=[a-z])-\n(?=[a-z])")   # "meth-\nod" -> "method"
+# ----------------------------------Text preprocessing and chunking----------------------------------------- #
+_HYPHEN_BREAK = re.compile(r"(?<=[a-z])-\n(?=[a-z])")   # join words split across lines
 _MULTI_SPACE = re.compile(r"[ \t]{2,}")
 _MULTI_BLANK = re.compile(r"\n{3,}")
 
 
 def _clean_text(text: str) -> str:
-    """Tidy PDF/web extraction noise that hurts embeddings.
-
-    Only used for PDFs and web pages. Plain text and Markdown are left alone
-    because collapsing spaces would break code blocks and nested lists.
-    Known limit: a real hyphenated word split at a line end ("state-\\nof-the-art")
-    is joined too, which is the usual trade-off in two-column papers.
-    """
+    """Clean text extracted from PDFs and web pages."""
     text = text.replace("\x00", "")
     text = _HYPHEN_BREAK.sub("", text)
     text = _MULTI_SPACE.sub(" ", text)
@@ -154,12 +133,11 @@ def _split_and_tag(
     source_type: str,
     splitter: RecursiveCharacterTextSplitter = _splitter,
 ) -> list[Document]:
-    """Split, drop blank chunks, and attach a small, consistent metadata set."""
+    """Split documents into chunks and attach source metadata."""
     chunks = [c for c in splitter.split_documents(documents) if c.page_content.strip()]
 
     if not chunks:
-        # Scanned PDFs, empty pages and JavaScript-only sites otherwise upload
-        # "successfully" with nothing in them.
+        # Avoid indexing documents with no extractable text.
         raise ValueError(
             f"No extractable text found in: {source} "
             "(scanned PDF, empty file, or a page rendered by JavaScript?)"
@@ -173,9 +151,7 @@ def _split_and_tag(
     return chunks
 
 
-# --------------------------------------------------------------------------- #
-# Local text and Markdown
-# --------------------------------------------------------------------------- #
+# -----------------------------------Text and Markdown files---------------------------------------- #
 def _text_loader(path: str) -> TextLoader:
     return TextLoader(path, encoding="utf-8", autodetect_encoding=True)
 
@@ -198,14 +174,12 @@ def load_markdown(file_path: str) -> list[Document]:
     return _load_text_file(file_path, "markdown", _md_splitter)
 
 
-# --------------------------------------------------------------------------- #
-# PDFs (local files, downloaded bytes, arXiv)
-# --------------------------------------------------------------------------- #
+# ------------------------------------PDF loading--------------------------------------- #
 _JUNK_TITLE = re.compile(r"(\.(dvi|docx?|tex|pdf)$)|^(microsoft word|untitled)", re.I)
 
 
 def _usable_pdf_title(documents: list[Document]) -> str | None:
-    """PDF metadata titles are often junk like 'main.dvi'; reject those."""
+    """Return a PDF title when its metadata is usable."""
     title = (documents[0].metadata.get("title") or "").strip()
     return title if len(title) >= 8 and not _JUNK_TITLE.search(title) else None
 
@@ -234,7 +208,7 @@ def _finalize_pdf(
     for document in documents:
         document.page_content = _clean_text(document.page_content)
 
-    # Title chain: caller's title -> usable PDF metadata title -> fallback.
+    # Prefer the supplied title, then PDF metadata, then the fallback.
     title = title or _usable_pdf_title(documents) or fallback_title
     return _split_and_tag(documents, title, source, source_type)
 
@@ -242,7 +216,7 @@ def _finalize_pdf(
 def load_pdf(file_path: str) -> list[Document]:
     path = Path(file_path)
     documents = PyMuPDFLoader(str(path)).load()
-    # Local files keep the file name as title so the paper list is predictable.
+    # Use the filename as the title for local PDFs.
     return _finalize_pdf(documents, str(path), "pdf", title=path.stem, fallback_title=path.stem)
 
 
@@ -254,10 +228,10 @@ def _load_pdf_bytes(
     fallback_title: str,
 ) -> list[Document]:
     if not pdf_bytes.startswith(b"%PDF"):
-        # Rate-limit pages and withdrawn-paper notices come back as HTML with a 200.
+        # Reject HTML responses returned instead of a PDF.
         raise ValueError(f"Response from {source} was not a PDF (rate-limited or withdrawn?)")
 
-    # The directory (and the PDF in it) is removed automatically, even on error.
+    # The temporary PDF is removed after loading.
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
         pdf_path = Path(tmp_dir) / "paper.pdf"
         pdf_path.write_bytes(pdf_bytes)
@@ -266,16 +240,15 @@ def _load_pdf_bytes(
     return _finalize_pdf(documents, source, source_type, title, fallback_title)
 
 
-# --------------------------------------------------------------------------- #
-# Web pages
-# --------------------------------------------------------------------------- #
+# ----------------------------------Web pages----------------------------------------- # 
+
 _BOILERPLATE_TAGS = ["script", "style", "noscript", "nav", "footer", "aside", "form", "svg", "iframe"]
 _BLOCK_TAGS = ["p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "pre", "blockquote",
                "td", "th", "figcaption", "dd", "dt"]
 
 
 def _html_to_text(raw_html: bytes, url: str) -> tuple[str, str]:
-    """Return (title, main text) with navigation and page chrome removed."""
+    """Extract the page title and readable text from HTML."""
     soup = BeautifulSoup(raw_html, "html.parser")
     title = soup.title.get_text(strip=True) if soup.title else ""
 
@@ -284,8 +257,7 @@ def _html_to_text(raw_html: bytes, url: str) -> tuple[str, str]:
 
     root = soup.find("main") or soup.find("article") or soup.body or soup
 
-    # Take each outermost block once, so nested <li><p>…</p></li> isn't doubled,
-    # and inline tags (<b>, <a>) stay inside their sentence.
+    # Skip nested blocks to avoid duplicate text.
     blocks = []
     for element in root.find_all(_BLOCK_TAGS):
         if element.find_parent(_BLOCK_TAGS):
@@ -301,7 +273,7 @@ def _html_to_text(raw_html: bytes, url: str) -> tuple[str, str]:
 def load_webpage(url: str) -> list[Document]:
     raw = _http_get(url, REQUEST_TIMEOUT)
 
-    # A plain link to a PDF is common; parse it as a paper instead of as HTML.
+    # Handle direct PDF links separately from HTML pages.
     if raw.startswith(b"%PDF"):
         return _load_pdf_bytes(raw, url, "web_pdf", title=None, fallback_title=url)
 
@@ -310,17 +282,15 @@ def load_webpage(url: str) -> list[Document]:
     return _split_and_tag([document], title, url, "web")
 
 
-# --------------------------------------------------------------------------- #
-# arXiv
-# --------------------------------------------------------------------------- #
+# ---------------------------------arXiv------------------------------------------ #
 def _extract_arxiv_id(text: str) -> str | None:
-    """Bare arXiv ID (no version) from an ID, an abs/pdf URL, or free text."""
+    """Extract an arXiv ID from a link or text."""
     match = ARXIV_ID_PATTERN.search(text)
     return match.group(1) if match else None
 
 
 def _arxiv_query(params: dict[str, str | int]) -> tuple[str, str] | None:
-    """One arXiv API call -> (bare_id, title) for the top hit, or None."""
+    """Get the first matching paper ID and title from arXiv."""
     url = f"{ARXIV_API}?{urllib.parse.urlencode(params)}"
     root = ET.fromstring(_http_get(url, REQUEST_TIMEOUT))
 
@@ -341,25 +311,21 @@ def _arxiv_query(params: dict[str, str | int]) -> tuple[str, str] | None:
 
 
 def _resolve_arxiv(query: str) -> tuple[str, str | None]:
-    """Turn an ID, URL, or title phrase into (arxiv_id, title).
-
-    Exactly one API call in every case: the search response already carries
-    the title, so no second lookup is needed.
-    """
+    """Resolve an arXiv ID, URL, or title to paper metadata."""
     arxiv_id = _extract_arxiv_id(query)
 
     if arxiv_id:
         try:
             found = _arxiv_query({"id_list": arxiv_id, "max_results": 1})
         except (urllib.error.URLError, TimeoutError, ET.ParseError):
-            # Metadata service is down, but the PDF may still download fine.
+            # Continue if metadata is unavailable but the PDF can be fetched.
             return arxiv_id, None
         if found is None:
             raise ValueError(f"No ArXiv paper found for ID: {arxiv_id}")
         return found
 
     phrase = query.strip().strip('"')
-    for field in ("ti", "all"):  # exact title first, then any field
+    for field in ("ti", "all"):  # search title before other fields
         found = _arxiv_query(
             {"search_query": f'{field}:"{phrase}"', "max_results": 1, "sortBy": "relevance"}
         )
@@ -374,12 +340,11 @@ def _download_arxiv_pdf(arxiv_id: str) -> bytes:
 
 
 def load_arxiv(query: str) -> list[Document]:
-    """Load a paper from an arXiv ID, an abs/pdf URL, or a title phrase."""
+    """Download and process a paper from arXiv."""
     known_id = _extract_arxiv_id(query)
 
     if known_id:
-        # The ID is already known, so the metadata lookup and the PDF download
-        # are independent: run them at the same time.
+        # Fetch metadata and the PDF concurrently when the ID is known.
         with ThreadPoolExecutor(max_workers=1) as pool:
             pdf_future = pool.submit(_download_arxiv_pdf, known_id)
             arxiv_id, title = _resolve_arxiv(query)  # raises if the ID doesn't exist
@@ -390,16 +355,14 @@ def load_arxiv(query: str) -> list[Document]:
 
     return _load_pdf_bytes(
         pdf_bytes,
-        source=f"https://arxiv.org/abs/{arxiv_id}",  # never a temp path
+        source=f"https://arxiv.org/abs/{arxiv_id}",  # permanent source URL
         source_type="arxiv",
-        title=title,                                  # arXiv API -> PDF metadata -> ID
+        title=title,                                  # prefer arXiv metadata
         fallback_title=arxiv_id,
     )
 
 
-# --------------------------------------------------------------------------- #
-# Dispatcher
-# --------------------------------------------------------------------------- #
+# ----------------------------------Document loader selection----------------------------------------- #
 _FILE_LOADERS: dict[str, Callable[[str], list[Document]]] = {
     ".pdf": load_pdf,
     ".txt": load_text,
@@ -409,12 +372,11 @@ _FILE_LOADERS: dict[str, Callable[[str], list[Document]]] = {
 
 
 def load_document(source: str) -> list[Document]:
-    """Load and split a supported file, web page, or arXiv link."""
+    """Load and split a supported document or URL."""
     source = source.strip()
 
     if source.startswith(("https://", "http://")):
-        # arXiv links go through the arXiv path: the abs page is just HTML
-        # boilerplate, not the paper.
+        # Load arXiv PDFs rather than their abstract pages.
         return load_arxiv(source) if ARXIV_URL_PATTERN.match(source) else load_webpage(source)
 
     path = Path(source)

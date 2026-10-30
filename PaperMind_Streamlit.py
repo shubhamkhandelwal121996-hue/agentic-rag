@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import streamlit as st
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessageChunk, HumanMessage
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
@@ -134,9 +134,7 @@ STEP_LABELS = {
     "generate_answer": "Wrote the answer",
 }
 
-# --------------------------------------------------------------------------- #
-# Chat storage
-# --------------------------------------------------------------------------- #
+# -----------------------------------Chat storage---------------------------------------- #
 def read_chats() -> dict:
     """Load locally persisted chat display data; graph state lives in SQLite."""
     try:
@@ -217,9 +215,7 @@ def delete_chat(chat_to_delete: str) -> None:
         st.session_state.notice = "Chat deleted, but " + "; ".join(problems) + "."
 
 
-# --------------------------------------------------------------------------- #
-# Ingestion and question answering
-# --------------------------------------------------------------------------- #
+# ------------------------------------Ingestion and question answering--------------------------------------- #
 def ingest_documents(docs: list, chat_id: str) -> int:
     if not docs:
         raise ValueError("The source contains no extractable text.")
@@ -246,25 +242,60 @@ def upload_file(file, chat_id: str) -> int:
             temporary_path.unlink(missing_ok=True)
 
 
-def ask_papermind(question: str, chat_id: str, on_step=None) -> str:
-    """Run the graph on a stable thread per chat, reporting each finished step."""
+def _chunk_text(chunk) -> str:
+    """Text of one streamed chunk (some models send a list of content parts)."""
+    content = chunk.content
+    if isinstance(content, str):
+        return content
+    return "".join(part.get("text", "") for part in content if isinstance(part, dict))
+
+
+def stream_answer(compiled_graph, question: str, chat_id: str, on_step=None, on_first_token=None):
+    """Run the graph and yield the answer text as the model writes it.
+
+    Two stream modes are read together:
+      "updates"  -> one event per finished node (drives the progress box)
+      "messages" -> LLM tokens; only those from the answer node are yielded,
+                    so the router, agent and relevancy check never leak in.
+    """
     config = {"configurable": {"thread_id": chat_id}}
     inputs = {"messages": [HumanMessage(content=question)], "session_id": chat_id}
 
-    # Streaming drives the live progress; the full final state is then read
-    # back from the checkpoint, so nothing has to be merged by hand.
-    for update in graph().stream(inputs, config=config, stream_mode="updates"):
-        if on_step is not None:
-            for node in update:
-                on_step(STEP_LABELS.get(node, node))
+    started = False
+    for mode, data in compiled_graph.stream(
+        inputs, config=config, stream_mode=["updates", "messages"]
+    ):
+        if mode == "updates":
+            if on_step is not None:
+                for node in data:
+                    on_step(STEP_LABELS.get(node, node))
 
-    result = graph().get_state(config).values
-    return result.get("final_answer") or "No answer was generated."
+        elif mode == "messages":
+            chunk, metadata = data
+            # LangGraph also re-emits the finished AIMessage the node returns;
+            # only real streamed chunks (AIMessageChunk) are shown, so the
+            # answer is never written twice.
+            if not isinstance(chunk, AIMessageChunk):
+                continue
+            if metadata.get("langgraph_node") != "generate_answer":
+                continue
+
+            text = _chunk_text(chunk)
+            if text:
+                if not started:
+                    started = True
+                    if on_first_token is not None:
+                        on_first_token()
+                yield text
 
 
-# --------------------------------------------------------------------------- #
-# UI helpers
-# --------------------------------------------------------------------------- #
+def get_final_answer(chat_id: str) -> str:
+    """The saved answer for the chat's latest turn, read from the checkpoint."""
+    config = {"configurable": {"thread_id": chat_id}}
+    return graph().get_state(config).values.get("final_answer") or ""
+
+
+# ------------------------------------UI helpers--------------------------------------- #
 def welcome_card(has_papers: bool) -> None:
     """Empty-chat starter: one-click example questions."""
     with st.container(border=True):
@@ -287,9 +318,7 @@ def welcome_card(has_papers: bool) -> None:
                 st.rerun()
 
 
-# --------------------------------------------------------------------------- #
-# Session setup
-# --------------------------------------------------------------------------- #
+# ----------------------------------Session setup----------------------------------------- #
 if "chats" not in st.session_state:
     st.session_state.chats = read_chats()
 if "active_chat" not in st.session_state:
@@ -303,9 +332,7 @@ if "active_chat" not in st.session_state:
 
 chat_id = st.session_state.active_chat
 
-# --------------------------------------------------------------------------- #
-# Sidebar
-# --------------------------------------------------------------------------- #
+# ---------------------------------Sidebar------------------------------------------ #
 with st.sidebar:
     st.header("🧠 PaperMind")
     if st.button("＋ New Chat", use_container_width=True):
@@ -451,21 +478,36 @@ if question:
         st.markdown(question)
 
     with st.chat_message("assistant", avatar=":material/psychology:"):
-        try:
-            with st.status("Researching…", expanded=True) as status:
-                try:
-                    answer = ask_papermind(
-                        question,
-                        chat_id,
-                        on_step=lambda label: status.write(f"✓ {label}"),
-                    )
-                except Exception:
-                    status.update(label="Something went wrong", state="error", expanded=False)
-                    raise
-                status.update(label="Done", state="complete", expanded=False)
+        status = st.status("Researching…", expanded=True)
 
-            st.markdown(answer)
+        def collapse_status() -> None:
+            status.update(label="Done", state="complete", expanded=False)
+
+        try:
+            # Steps tick off in the status box; once the answer starts
+            # streaming, the box collapses so the text takes the spotlight.
+            streamed = st.write_stream(
+                stream_answer(
+                    graph(),
+                    question,
+                    chat_id,
+                    on_step=lambda label: status.write(f"✓ {label}"),
+                    on_first_token=collapse_status,
+                )
+            )
+            was_streamed = isinstance(streamed, str) and bool(streamed.strip())
+
+            # The saved answer is the source of truth for the chat history.
+            answer = get_final_answer(chat_id) or (streamed if was_streamed else "")
+            answer = answer or "No answer was generated."
+
+            # Claim checks and "nothing relevant found" replies are built in
+            # code rather than written by the model, so nothing streamed.
+            if not was_streamed:
+                st.markdown(answer)
+            collapse_status()
         except Exception as exc:
+            status.update(label="Something went wrong", state="error", expanded=False)
             st.error(f"PaperMind could not complete the request: {exc}")
         else:
             current_chat["messages"].extend(
