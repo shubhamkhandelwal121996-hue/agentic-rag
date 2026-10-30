@@ -1,0 +1,219 @@
+{
+  "d81173b3-0165-4e2c-a9bd-16fc8c75bb7b": {
+    "title": "what is inside this uploaded report?",
+    "created": "2026-10-26T16:30:54.667031+00:00",
+    "messages": [
+      {
+        "role": "user",
+        "content": "what is inside this uploaded report?"
+      },
+      {
+        "role": "assistant",
+        "content": "The uploaded report is an M.Tech project report titled **\u201cAutonomous AI Orchestration: A Cloud-Native Platform for Resilient, Cost-Optimized Multimodal AI Operations.\u201d** [1]\n\nFrom the table of contents, it appears to include: **Introduction, Problem Statement, Objectives and Scope, Literature Review, Phase 1 (Foundational Architecture and Core Gateway/MVP), Phase 2 (Intelligence Layer: RAG and Semantic Caching), Phase 3 (Optimization Engine: Dynamic Routing and Advanced Features), Phase 4 (Production Readiness: Containerization and CI/CD), Results and Performances, Conclusion, Future Work, and References.** [2][3][4][5]\n\nThe declaration page says it is the author\u2019s original work submitted for the **Master of Technology** degree, under the guidance of **Professor Pawan Kumar** at **IIT Kharagpur**. [1]\n\nI do not have the full body text of the report here, so I can only describe the sections shown in the evidence. [2][3][4][5]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 5,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi! How can I help you today?",
+        "details": {
+          "route": "direct_answer",
+          "retrieved_passages": 0,
+          "query_rewrites": 0,
+          "relevant": null
+        }
+      },
+      {
+        "role": "user",
+        "content": "can  u tell me dileep report problem statement"
+      },
+      {
+        "role": "assistant",
+        "content": "The report\u2019s problem statement is that modern AI applications often depend on direct integration with a single provider or model, which creates major issues such as high and unpredictable cost, operational fragility during provider outages, vendor lock-in, and poor adaptability across different workload types. [1]\n\nIt also says these problems become more serious when applications need grounded retrieval, tool use, session continuity, multimodal inputs, content generation, and long-running asynchronous workflows. [1]\n\nIf you want, I can also help turn this into a shorter \u201cproblem statement\u201d paragraph for your project presentation.",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "dileep project guide name?"
+      },
+      {
+        "role": "assistant",
+        "content": "Dileep\u2019s project guide is Professor Pawan Kumar. [2][3]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "what is current weather of delhi"
+      },
+      {
+        "role": "assistant",
+        "content": "The evidence says that on 24 Oct. 2026, New Delhi\u2019s current weather was **Sunny**, with a temperature of **28\u00b0C** and humidity of **35%**. [2]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "26 october 2026 weather of delhi"
+      },
+      {
+        "role": "assistant",
+        "content": "On 26 October 2026, Delhi is forecast to be **sunny** with a **high of 34\u00b0C** and a **low of 27\u00b0C**, and **0 mm** of rain expected. [1]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 5,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      }
+    ]
+  },
+  "37bb574c-73b2-4a9c-b117-05595a479ded": {
+    "title": "Attention is all you need",
+    "created": "2026-10-28T08:21:23.572631+00:00",
+    "messages": [
+      {
+        "role": "user",
+        "content": "tell me about this uploaded paper summary in 50 wrods"
+      },
+      {
+        "role": "assistant",
+        "content": "The paper presents the Transformer, a sequence transduction model based entirely on attention, replacing recurrent layers with multi-headed self-attention. It trains faster than recurrent or convolutional architectures on translation tasks and achieves state-of-the-art results on WMT 2014 English-German and English-French. The authors also plan to extend it beyond text. [1]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "is there any new research who superseded this"
+      },
+      {
+        "role": "assistant",
+        "content": "## Claim check\nClaim: is there any new research who superseded this\nVerdict: The provided search results do not identify a specific research claim, and none of the listed papers clearly overturn or supersede it. Based on the evidence shown, there is no basis to say the claim has been superseded.\n\nNo newer work that challenges this claim was found.",
+        "details": {
+          "route": "verify_claim",
+          "retrieved_passages": 0,
+          "query_rewrites": 0,
+          "relevant": null
+        }
+      },
+      {
+        "role": "user",
+        "content": "ok who are main founder of this paper"
+      },
+      {
+        "role": "assistant",
+        "content": "The provided evidence does not identify the paper\u2019s \u201cmain founder(s).\u201d It only mentions authors and contributors such as Niki, Llion, Lukasz, and Aidan, but it does not say who founded the paper [1].",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 5,
+          "query_rewrites": 1,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "tell me all authors name"
+      },
+      {
+        "role": "assistant",
+        "content": "The authors named in the evidence are: Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, \u0141ukasz Kaiser, and Illia Polosukhin. [1]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 3,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "who build llm using this paper first?"
+      },
+      {
+        "role": "assistant",
+        "content": "The evidence does not say who first built an LLM using this paper. [1][2][3][4][5]\n\nIt only says that Jakob proposed replacing RNNs with self-attention, and that Ashish and Illia designed and implemented the first Transformer models, with Noam proposing key attention mechanisms. [5]",
+        "details": {
+          "route": "retrieve",
+          "retrieved_passages": 5,
+          "query_rewrites": 0,
+          "relevant": true
+        }
+      },
+      {
+        "role": "user",
+        "content": "what is self attention?"
+      },
+      {
+        "role": "assistant",
+        "content": "Self-attention is a mechanism that lets a model decide how much each part of an input should \u201cpay attention\u201d to every other part.\n\n### Intuition\nIf you have a sentence like:\n\n> \u201cThe animal didn\u2019t cross the street because **it** was tired.\u201d\n\nTo understand what \u201cit\u201d refers to, the model needs to look at other words in the sentence. Self-attention helps each word gather information from the other words that are most relevant.\n\n### How it works, simply\nFor each token/word, the model computes:\n- **Query**: what this token is looking for\n- **Key**: what each other token offers\n- **Value**: the information each token carries\n\nThen it compares the query of one token with the keys of all tokens to get attention weights, and uses those weights to blend the values.\n\n### Why it\u2019s useful\n- Captures relationships between distant words\n- Works in parallel, unlike older sequential models\n- Helps transformers understand context better\n\n### In one sentence\nSelf-attention is a way for a model to dynamically weight other parts of the same input to build a context-aware representation of each token.\n\nIf you want, I can also show a tiny numeric example or a diagram.",
+        "details": {
+          "route": "direct_answer",
+          "retrieved_passages": 0,
+          "query_rewrites": 0,
+          "relevant": null
+        }
+      },
+      {
+        "role": "user",
+        "content": "what is multi head self attention"
+      },
+      {
+        "role": "assistant",
+        "content": "**Multi-head self-attention** is a mechanism used in Transformers that lets a model look at different parts of a sequence at the same time and learn multiple kinds of relationships between tokens.\n\n### Self-attention\nFor each token, the model asks:\n- Which other tokens in the sequence are relevant to me?\n- How much attention should I pay to each one?\n\nIt does this by computing:\n- **Query (Q)**: what this token is looking for\n- **Key (K)**: what each token offers\n- **Value (V)**: the information to combine\n\nThe attention score between tokens is based on how well the query matches the keys.\n\n### Why \u201cmulti-head\u201d?\nInstead of doing this once, the model does it **several times in parallel** with different learned projections. Each \u201chead\u201d can focus on different patterns, such as:\n- syntax\n- long-range dependencies\n- coreference\n- nearby context\n\nThen the outputs of all heads are combined.\n\n### Intuition\nIf a word like **\u201cit\u201d** appears in a sentence, one head might focus on the noun it refers to, while another head might focus on the surrounding verb or subject structure.\n\n### In short\nMulti-head self-attention =  \n**multiple parallel self-attention operations that let the model capture different relationships in the same sequence.**\n\nIf you want, I can also show:\n1. a simple formula,  \n2. a small numerical example, or  \n3. a diagram-like explanation."
+      },
+      {
+        "role": "user",
+        "content": "ok who build CHATGPT?"
+      },
+      {
+        "role": "assistant",
+        "content": "ChatGPT was built by **OpenAI**, an AI research and deployment company.\n\nIt was developed by a team of researchers, engineers, and product people at OpenAI, rather than by one single person. If you want, I can also tell you **who founded OpenAI** or give a **short history of how ChatGPT was made**."
+      },
+      {
+        "role": "user",
+        "content": "WHAT IS attention score?"
+      },
+      {
+        "role": "assistant",
+        "content": "An **attention score** is a number that tells a model **how much focus to give one piece of information when looking at another piece**.\n\n### In simple terms\nIf a model is reading a sentence, attention scores help it decide:\n- which words are most relevant to the current word\n- how strongly each word should influence the output\n\n### Example\nIn the sentence:\n\n> \u201cThe cat sat on the mat because it was tired.\u201d\n\nTo understand what **\u201cit\u201d** refers to, the model may give higher attention scores to **\u201ccat\u201d** than to other words.\n\n### In transformers\nAttention scores are usually computed by comparing:\n- a **query** vector\n- with **key** vectors\n\nThe result is a score showing relevance. These scores are then turned into weights, often using **softmax**, so they sum to 1.\n\n### Why it matters\nAttention scores let models:\n- capture relationships between words far apart\n- focus on important parts of the input\n- improve understanding and prediction\n\nIf you want, I can also explain **attention scores with a math formula** or with a **visual example**."
+      },
+      {
+        "role": "user",
+        "content": "explain math"
+      },
+      {
+        "role": "assistant",
+        "content": "Math is the study of patterns, quantities, shapes, and relationships. It\u2019s a way of describing and understanding the world using numbers, symbols, and logic.\n\n## Big areas of math\n- **Arithmetic**: basic operations like add, subtract, multiply, divide\n- **Algebra**: uses symbols like \\(x\\) to represent unknowns\n- **Geometry**: shapes, sizes, angles, and \u10e1\u10d8\u10d5\u10e0\u10eae\n- **Statistics**: collecting and interpreting data\n- **Calculus**: change and motion, like slopes and rates\n- **Probability**: chance and uncertainty\n\n## Simple example\nIf you have 3 apples and get 2 more:\n\\[\n3 + 2 = 5\n\\]\nThat\u2019s math.\n\n## Why math matters\n- Helps with everyday life: money, shopping, cooking\n- Used in science and engineering\n- Helps solve problems logically\n- Powers technology, computers, and AI\n\n## In one sentence\nMath is the language of patterns and problem-solving.\n\nIf you want, I can also explain math for:\n- kids\n- beginners\n- school homework\n- a specific topic like algebra or calculus"
+      }
+    ]
+  },
+  "7931d0ac-8db0-4f18-8d5f-552b25530a52": {
+    "title": "New Chat",
+    "created": "2026-10-28T11:28:47.041284+00:00",
+    "messages": []
+  }
+}
