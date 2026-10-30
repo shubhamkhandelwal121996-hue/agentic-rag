@@ -21,8 +21,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 logger = logging.getLogger(__name__)
 
 # ----------------------------------HTTP requests and URL validation----------------------------------------- #
-CHUNK_SIZE = 900
-CHUNK_OVERLAP = 200
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 150
 
 REQUEST_TIMEOUT = 30            # web and arXiv API requests
 PDF_TIMEOUT = 60                # PDF downloads

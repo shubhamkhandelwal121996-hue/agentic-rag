@@ -177,7 +177,7 @@ def ResearchPaper_VectorStore(
     Do NOT use it for current events, recent developments, or anything that
     would not appear in the uploaded papers; use the web_search tool for those."""
 
-    documents = VectorStore_search(query=query, session_id=session_id, k=4)
+    documents = VectorStore_search(query=query, session_id=session_id, k=3)
 
     if not documents:
         msg = "No relevant passages were found in the uploaded papers."

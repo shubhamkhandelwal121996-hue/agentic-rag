@@ -29,9 +29,7 @@ from agentic_rag.core.rag_loaders import load_arxiv, load_document
 # "centered" keeps the chat column and the input box aligned and readable.
 st.set_page_config(page_title="🧠PaperMind", page_icon="🧠", layout="centered")
 
-# --------------------------------------------------------------------------- #
-# Styling
-# --------------------------------------------------------------------------- #
+# ----------------------------------Styling----------------------------------------- #
 st.markdown(
     """
     <style>

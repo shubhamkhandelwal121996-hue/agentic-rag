@@ -1,0 +1,1543 @@
+{
+  "total_evaluated": 48,
+  "total_skipped": 0,
+  "evaluation_results": [
+    {
+      "question": "If decoder masking were removed, how would enc-dec, enc self-, and dec self-attn differ?\nAnswer using the uploaded research papers.",
+      "generated_answer": "With decoder masking removed, the main difference would be that decoder self-attention would no longer be restricted to positions up to and including the current position, so each decoder position could attend to all positions in the decoder, including future ones. [1]\n\nEncoder-decoder attention would still connect the decoder to the encoder, where the decoder attends over the encoder’s output representations. [2][3]\n\nEncoder self-attention would also remain unchanged: each encoder position can attend to all positions in the previous encoder layer. [1]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the most relevant node in retrieval contexts is ranked 1st and directly explains that decoder self-attention would change by allowing attention to future positions, while the next two nodes in retrieval contexts are irrelevant to the specific comparison and should be ranked lower since they only give broad Transformer background or mention auto-regression without addressing how enc-dec, enc self-, and dec self-attn differ when masking is removed."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because node 1 in retrieval context fully supports sentences 1-4: sentence 1 matches the encoder-decoder attention description, sentence 2 matches encoder self-attention being unchanged, sentence 3 matches decoder self-attention changing to attend to all decoder positions including future tokens, and sentence 4 matches the stated goal of preventing leftward information flow to preserve the auto-regressive property."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8666666666666667,
+          "passed": true,
+          "reason": "The score is 0.87 because the retrieved paper is mostly on-topic, explaining that in encoder self-attention “each position can attend to all positions” and that in decoder self-attention “masking is used to prevent leftward information flow to preserve the auto-regressive property,” which directly relates to the question. However, some context is irrelevant, including details about “Position-wise Feed-Forward Networks” and “end-to-end memory networks” for “simple-language question answering and language modeling tasks,” so the match is strong but not perfect."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stayed fully on topic and addressed the masking differences in encoder-decoder, encoder self-attention, and decoder self-attention using the research papers, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output aligns perfectly with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Summarize Transformer training: WMT14 En-De/En-Fr data, 8×P100 batches, Adam warmup schedule, dropout.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The Transformer was trained on the WMT 2014 English-German and English-French translation tasks, and the English-French setup used a 36M-sentence dataset split into a 32,000 word-piece vocabulary. Sentence pairs were batched by approximate sequence length, with each batch containing about 25,000 source tokens and 25,000 target tokens. [1]\n\nTraining was done on one machine with 8 NVIDIA P100 GPUs. For the base models, each training step took about 0.4 seconds and training ran for 100,000 steps (about 12 hours). The big models had a step time of 1.0 second and were trained for 300,000 steps (3.5 days). [1]\n\nThey used the Adam optimizer with β1 = 0.9, β2 = 0.98, and ϵ = 10−9, with a learning-rate schedule that scaled with model dimension and followed a warmup-based formula over training steps. [1]\n\nFor WMT 2014 English-to-French, the big model used dropout rate Pdrop = 0.1 instead of 0.3. [3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieval contexts rank all relevant nodes at the top: node 1 contains the WMT14 En-De/En-Fr data details, node 2 gives the 8×P100 training setup and batching, and node 3 provides the Adam warmup schedule and dropout-related training settings. There are no irrelevant nodes placed above relevant ones, so precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because every sentence in the expected output is supported by node(s) in retrieval context: sentence 1 is covered by node 1 with the WMT 2014 English-German and English-French dataset sizes, vocabulary details, batching, hardware, steps, and optimizer; sentence 2 is supported by node 1’s learning-rate formula and warmup_steps = 4000; sentence 3 is supported by node 1 and node 3 with the batching/training setup and the 8 P100 GPU training times; sentence 4 is supported by node 1 with Adam’s β1, β2, and ε; sentence 5 is supported by node 1 with the exact schedule behavior; and sentence 6 is supported by node 3 with dropout rate 0.1. Great recall throughout."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7222222222222222,
+          "passed": true,
+          "reason": "The score is 0.72 because the context includes key Transformer training details like \"We trained our models on one machine with 8 NVIDIA P100 GPUs,\" \"We used the Adam optimizer,\" and \"The Transformer (big) model trained for English-to-French used dropout rate Pdrop = 0.1,\" but much of it is still off-topic since it discusses \"RoBERTa/LoRA training settings\" and \"RoBERTa large\" rather than the requested WMT14 En-De/En-Fr training summary."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the answer stays fully focused on the requested Transformer training details from the papers, with no irrelevant statements and no noticeable off-topic content. It directly addresses the dataset, batch setup, Adam warmup schedule, and dropout as asked."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output aligns fully with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "If RNNs/CNNs vanished, how would Transformer attention alone capture input-output dependencies?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The paper says the Transformer is “based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.” [3] It explains that the encoder uses self-attention, where each position can attend to all positions in the previous encoder layer, so input positions can interact with one another to form representations. [2] It also says the decoder uses self-attention over its own previous positions, with masking to prevent access to future positions and preserve auto-regression. [2] The paper further notes that the Transformer uses an encoder-decoder structure, where the encoder maps the input sequence to continuous representations and the decoder generates the output from those representations. [1]\n\nSo, based on the paper, attention alone captures input-output dependencies by using encoder self-attention to build input representations and decoder self-attention plus the encoder-decoder structure to generate outputs from those representations, without RNNs or CNNs. [1][2][3]\n\nThe evidence does not give more detail on the exact mathematical mechanism beyond this description.",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top-ranked nodes in the retrieval contexts are all relevant, so the most useful evidence is already placed first. Node rank 1 is highly relevant since it says the Transformer is \"based solely on attention mechanisms, dispensing with recurrence and convolutions entirely,\" directly supporting how attention alone captures dependencies. Node rank 2 also stays relevant by explaining that \"each position in the encoder can attend to all positions\" in the previous layer, which is exactly the mechanism needed. Node rank 3 reinforces the same idea with the same \"based solely on attention mechanisms, dispensing with recurrence and convolutions entirely\" claim. There are no irrelevant nodes ranked above relevant ones, so the precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all sentences in the expected output are fully supported: sentence 1 is matched by node 1 in the retrieval context, sentence 2 by node 2, sentence 3 by node 2 as well, and sentence 4 by nodes 1 and 3, including the no-recurrence/no-convolution and positional-order ideas. Great recall!"
+        },
+        "Contextual Relevancy": {
+          "score": 0.6666666666666666,
+          "passed": false,
+          "reason": "The score is 0.67 because the context includes directly relevant support such as 'The Transformer is a new simple network architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely' and 'The Transformer is the first transduction model relying entirely on self-attention,' which answers how attention can work without RNNs/CNNs. However, some retrieved text is only partially useful or off-topic, like 'Model Architecture,' 'See Figure 2,' and the unrelated discussion of end-to-end memory networks and training speed, so the context is relevant but not fully focused."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on explaining how Transformer attention alone can model input-output dependencies, directly addressing the question using the provided research papers with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output aligns perfectly with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "How does the Transformer decoder block future pos. in self-attn, and why preserve auto-regression?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The Transformer decoder blocks future positions by masking out “illegal connections” in scaled dot-product attention, specifically by setting to −∞ the input values to the softmax that correspond to subsequent positions. [1] This prevents each decoder position from attending to positions after it. [1][2]\n\nIt does this to preserve the auto-regressive property: the model generates output one element at a time, and each prediction for position *i* should depend only on known outputs at positions less than *i*. [2][3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked first through third and all directly support the answer: node 1 says masking blocks \"illegal connections\" so positions can attend only up to the current one, node 2 explains masking \"to prevent positions from attending to subsequent positions\" and that outputs are offset by one to preserve auto-regression, and node 3 reinforces that the decoder generates output \"one element at a time\" and is \"auto-regressive.\" There are no irrelevant nodes placed above these relevant nodes, so nothing needs to be pushed lower."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 and node 2 in the node(s) in retrieval context, which describe masking illegal future connections, setting them to −∞ before softmax, and giving zero attention to those positions. Sentence 2 is also fully supported by node 2 and node 3, which explain that predictions for position i depend only on earlier positions and that the decoder generates outputs one step at a time auto-regressively. Great match overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.3888888888888889,
+          "passed": false,
+          "reason": "The score is 0.39 because the context includes some directly relevant decoder details like \"prevent leftward information flow in the decoder to preserve the auto-regressive property\" and masking \"all values... which correspond to illegal connections,\" but much of it is off-topic, focusing on \"general encoder-decoder attention mechanisms and citations\" and \"the encoder, not the decoder behavior asked about in the input.\""
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully on topic, directly explaining how the Transformer decoder masks future positions in self-attention and why this preserves autoregressive generation, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "How does LoRA freeze W₀, train low-rank BA, cut params/memory, and avoid inference latency?\nAnswer using the uploaded research papers.",
+      "generated_answer": "LoRA keeps the pre-trained weights frozen and uses low-rank adaptation instead, training only the injected low-rank matrices A and B rather than the full weight matrix. [1][3] This reduces storage and compute because a very low rank can suffice even when the original weight matrix has very high rank, and it lowers memory/hardware cost because gradients and optimizer states are needed only for the much smaller low-rank matrices. [1][3]\n\nAt deployment, LoRA can explicitly compute and store the merged weight \\(W = W_0 + BA\\) and perform inference as usual, so it introduces no inference latency compared to a fully fine-tuned model. [2][3]\n\n",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top 3 nodes in the retrieval contexts are all relevant and correctly ranked: node 1 explains that LoRA keeps the \"pre-trained weights frozen\" and optimizes only \"much smaller low-rank matrices,\" node 2 adds that \"W0 and BA\" can be used for inference, and node 3 confirms the merged deployment has \"no inference latency.\" Since there are no irrelevant nodes above any relevant ones, the ranking is fully precise."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 and node 2 in retrieval context, sentence 2 is supported by node 1 and node 2, and sentence 3 is supported by node 2 and node 1; all details about frozen weights, low-rank updates, reduced parameters, and merged deployment are covered."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7619047619047619,
+          "passed": true,
+          "reason": "The score is 0.76 because the context includes key LoRA details like “keeping the pre-trained weights frozen,” “we only optimize the injected, much smaller low-rank matrices,” and “introducing no inference latency compared to a fully fine-tuned model,” but some parts are still generic or incomplete, such as “This is a generic transition statement” and “We use r to,” so it is mostly relevant but not perfectly targeted."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addressed LoRA’s key ideas from the papers: freezing W₀, training the low-rank BA update, reducing parameters and memory, and avoiding inference latency. There were no irrelevant statements, so it is maximally relevant."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output appears fully aligned with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Analyze LoRA’s low-rank updates vs adapters for GPT-3 task-switching efficiency and zero added latency.\nAnswer using the uploaded research papers.",
+      "generated_answer": "LoRA is described as adding external modules in a **parallel** manner, unlike adapter layers, which are added **sequentially** to the pre-trained model. Because of that, adapter layers must be computed in addition to the base model and therefore introduce additional inference latency. [1]\n\nThe paper says this latency can be mitigated when batch size and/or sequence length are large enough, but it can still be significant in online inference where batch size is small. [1] The latency table shows adapter methods are slower than fine-tune/LoRA across the reported GPT-2 medium settings, with the largest slowdown at batch size 1 and sequence length 128. [2]\n\nFor GPT-3 task switching, LoRA is presented as more efficient because a shared pre-trained model can be reused while only the small LoRA matrices \\(A\\) and \\(B\\) are swapped for different tasks. The paper says this reduces storage requirements and task-switching overhead significantly. [3] It also states that a very low rank suffices even for GPT-3 175B, making LoRA storage- and compute-efficient. [3]\n\nOn “zero added latency,” the evidence supports LoRA as avoiding the extra latency associated with adapter layers because LoRA is parallel to the base model rather than sequentially stacked on top of it. [1] However, the provided passages do not explicitly use the phrase “zero added latency,” so that exact claim is not stated verbatim in the evidence. [1]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieved nodes in retrieval contexts are perfectly ranked: node 1 directly says LoRA can be shared across tasks and lets you “efficiently switch tasks by replacing the matrices A and B,” node 2 supports the zero-latency advantage by stating adapter layers “must be computed in addition to the base model, inevitably introducing additional latency,” node 3 reinforces that gap with concrete overhead numbers like “(+2.2%)”, “(+5.0%)”, “(+20.7%)”, and “(+30.3%)”, and node 4 confirms LoRA’s “very low rank” design with frozen weights and that it is “storage- and compute-efficient.” Since all relevant nodes appear before any irrelevant nodes, there is no ranking penalty and the score is already maximal."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all three sentences are fully supported by the retrieval context: sentence 1 is backed by node 1 and node 3 (frozen pretrained weights, small low-rank matrices, GPT-3 175B efficiency, and reduced memory/parameter cost); sentence 2 is supported by node 3 (shared pretrained model and task replacement/switching with reduced overhead); and sentence 3 is supported by node 1 and node 2 (LoRA can be merged into the base weights with no extra inference cost, while adapters add latency, including the reported short-sequence overheads)."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7857142857142857,
+          "passed": true,
+          "reason": "The score is 0.79 because most of the context directly supports the query: LoRA is described as enabling task switching by “replacing the matrices A and B, reducing the storage requirement and task-switching overhead significantly,” and it has “zero added latency” advantages since adapter layers “inevitably introduc[e] additional latency” while LoRA is added “in a parallel manner.” A small portion is irrelevant, such as the note that “We use an NVIDIA Quadro RTX8000,” and the GPT-3 MNLI/RTE accuracy discussion."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the LoRA vs. adapters comparison for GPT-3 task-switching efficiency and zero added latency, with no irrelevant statements. It is already at the maximum since everything in the output is on-topic and directly responsive."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output fully aligns with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "How do BERT, OpenAI GPT, and ELMo differ in context modeling and training approach?\nAnswer using the uploaded research papers.",
+      "generated_answer": "BERT uses a bidirectional Transformer, so its representations are jointly conditioned on both left and right context in all layers. [1] OpenAI GPT uses a left-to-right Transformer language model, so it conditions only on left context. [1] ELMo uses the concatenation of independently trained left-to-right and right-to-left LSTMs to generate features, rather than a single jointly bidirectional Transformer. [1] In terms of training approach, BERT and OpenAI GPT are fine-tuning approaches, while ELMo is a feature-based approach. [1]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top retrieval contexts are all relevant nodes in retrieval contexts and are already perfectly ranked: node 1 supports BERT with \"bidirectional Transformer\" and joint conditioning on both left and right context; node 2 supports GPT with \"left-to-right Transformer LM\" and its fine-tuning approach; node 3 supports ELMo with \"concatenation of independently trained left-to-right and right-to-left LSTMs\" and its feature-based approach. There are no irrelevant nodes placed above relevant ones, so the ranking is ideal."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node(s) in retrieval context 1 and 2 via Figure 3’s description of BERT as a bidirectional Transformer jointly conditioned on both left and right context, and sentence 2 is supported by the same nodes stating BERT and OpenAI GPT are fine-tuning approaches; sentence 3 is also supported by node(s) in retrieval context 1 and 2 through Figure 3’s description of ELMo using separate left-to-right and right-to-left LSTMs, not jointly conditioning all layers, and being feature-based. Great match overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7368421052631579,
+          "passed": true,
+          "reason": "The score is 0.74 because the retrieval context includes several directly relevant comparisons like \"BERT uses a bidirectional Transformer,\" \"OpenAI GPT uses a left-to-right Transformer,\" and \"ELMo uses the concatenation of independently trained left-to-right and right-to-left LSTMs,\" but it is also diluted by irrelevant material such as \"This hyperparameter list is not relevant\" and \"This statement about dataset size and hyperparameter sensitivity is not relevant.\""
+        },
+        "Answer Relevancy": {
+          "score": 0.875,
+          "passed": true,
+          "reason": "The score is 0.88 because the answer mostly addresses how BERT, GPT, and ELMo differ in context modeling and training, but it includes a small inaccurate/irrelevant framing by treating BERT and GPT as fine-tuning approaches rather than pretrained language models. Overall it is strongly on-topic, but that mistake keeps it from being higher."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output fully aligns with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Explain BERT NSP pair sampling, incl. 50% random B, A/B embeddings, and 512-token cap.\nAnswer using the uploaded research papers.",
+      "generated_answer": "BERT forms pre-training examples from sentence pairs A and B, packing the two sentences together into a single sequence and separating them with a special `[SEP]` token. It also adds a learned segment embedding to each token to indicate whether that token belongs to sentence A or sentence B. [3]\n\nFor the next sentence prediction (NSP) task, B is sampled so that 50% of the time it is the actual next sentence that follows A, and 50% of the time it is a random sentence. This creates a binary NSP label. [1][2]\n\nThe pair is sampled so that the combined length of A and B is at most 512 tokens. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top-ranked retrieval context nodes are all relevant and correctly ordered: node 1 directly covers the 50% random vs actual next-sentence sampling and the A/B embedding detail, node 2 reinforces the NSP sampling rule with similar support, and node 3 adds the sentence A/B embedding distinction. Since there are no irrelevant nodes above relevant ones, there is nothing to push down, and the ranking is already optimal."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 and node 2 in retrieval context, which together state that sentence A gets the A embedding and sentence B gets the B embedding; sentence 2 is supported by node 2, which gives the 50% IsNext / 50% random NotNext sampling; and sentence 3 is supported by node 1 and node 2, which specify the combined length limit of 512 tokens and the 15% masked LM corruption rate after WordPiece tokenization."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5,
+          "passed": false,
+          "reason": "The score is 0.50 because the context does include key BERT NSP details like \"50% of the time B is the actual next sentence that follows A and 50% of the time it is a random sentence\" and \"A learned embedding is added to every token indicating whether it belongs to sentence A or sentence B,\" plus \"They are sampled such that the combined length is ≤512 tokens.\" However, much of it is irrelevant, focusing on masking/training specifics such as \"The LM masking is applied after WordPiece tokenization\" and \"We train with batch size of 256 sequences ... for 1,000,000 steps,\" which do not address the requested NSP pair sampling details."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on BERT NSP pair sampling, including the 50% random B rule, A/B embeddings, and the 512-token limit, with no irrelevant statements."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "How does LoRA adapt Transformer attention via low-rank matrices while freezing pretrained weights, cutting VRAM?\nAnswer using the uploaded research papers.",
+      "generated_answer": "LoRA adapts a Transformer by injecting trainable low-rank matrices into the model while keeping the pretrained weights frozen. [3] In the Transformer setting, it applies this mainly to the attention weights, treating each attention projection matrix as a single \\(d_{model} \\times d_{model}\\) matrix and focusing on adapting \\(W_q\\) (or \\(W_k, W_v\\)) while freezing the MLP modules. [2] This reduces the number of trainable parameters because only the much smaller low-rank matrices are optimized instead of the full weight matrices. [1][3]  \n\nThis cuts VRAM because the method does not need to calculate gradients or maintain optimizer states for most parameters, only for the injected low-rank matrices. [3] The paper also notes that the low-rank design can be merged with the frozen weights at deployment, so it introduces no additional inference latency compared with a fully fine-tuned model. [1][2]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top-ranked retrieval context nodes all directly support the answer: node 1 says LoRA keeps the \"pre-trained weights frozen\" and trains \"much smaller low-rank matrices,\" node 2 adds that it applies to attention weights like \"Wq, Wk, Wv, Wo\" while freezing the MLP modules, and node 3 explains the VRAM savings by noting that we do not need gradients or optimizer states for most parameters. There are no irrelevant nodes ranked above relevant ones, so the ranking is perfectly precise."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 and node 2 in retrieval context, which describe LoRA freezing the pretrained/shared weights and training small low-rank matrices on attention projections like Wq and Wv; sentence 2 is fully supported by node 2 and node 3, which state that only the injected low-rank parameters need gradients/optimizer states, reducing hardware/memory by up to 3x, and that merging them back into frozen weights adds no inference latency."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8,
+          "passed": true,
+          "reason": "The score is 0.80 because most of the context directly explains LoRA’s mechanism: it says “we only optimize the injected, much smaller low-rank matrices,” “adaptation instead, while keeping the pre-trained weights frozen,” and that this yields “no inference latency” and is “storage- and compute-efficient.” A few lines are only loosely relevant or off-topic, such as the note that combining with “prefix-tuning” is “not directly relevant” and that some statements “do not address how LoRA adapts attention.”"
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response directly addresses how LoRA uses low-rank matrices to adapt Transformer attention while keeping pretrained weights frozen and reducing VRAM, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully consistent with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Quantify LoRA’s VRAM, ckpt-size, and training-throughput gains on GPT-3 175B vs FT.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The provided evidence says LoRA trains “on the fly on machines that store the pre-trained weights in VRAM,” but it does not give a numeric VRAM gain for GPT-3 175B vs. full fine-tuning. [1]\n\nIt does state that on GPT-3 175B, LoRA gives a 25% speedup during training compared to full fine-tuning, because it does not need to calculate gradients for most parameters. [1]\n\nThe evidence does not provide any checkpoint-size comparison for LoRA vs. full fine-tuning on GPT-3 175B. [1][2][3]\n\nThe evidence also shows LoRA uses far fewer trainable parameters than full fine-tuning on GPT-3 175B: 4.7M or 37.7M for LoRA versus 175,255.8M for full fine-tuning. [3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 0.8333333333333333,
+          "passed": true,
+          "reason": "The score is 0.83 because the top-ranked retrieval context node (rank 1) and node 3 both capture key evidence for the answer: node 1 quotes, \"We also observe a 25% speedup during training on GPT-3 175B compared to full fine-tuning\", and node 3 quotes, \"GPT-3 (FT) 175,255.8M\" alongside \"GPT-3 (LoRA) 4.7M / 37.7M\", which supports LoRA’s parameter/checkpoint-size efficiency. The score is not higher because node 2 is an irrelevant retrieval context ranked above node 3; although it mentions GPT-3 175B, it does not provide the requested VRAM, checkpoint-size, or throughput gain numbers, so a less relevant node should have been placed lower."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by nodes 1 and 2 in retrieval context: node 1 explicitly gives the 25% training speedup on GPT-3 175B versus full fine-tuning, and node 1 also explains it comes from not needing gradients for most parameters, which matches the final sentence about freezing most pretrained parameters and training only small low-rank matrices. Sentence 2 is also consistent with the same retrieved material, so nothing is missing."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5263157894736842,
+          "passed": false,
+          "reason": "The score is 0.53 because the context includes some directly relevant GPT-3 175B LoRA evidence, such as “We also observe a 25% speedup during training on GPT-3 175B compared to full fine-tuning” and notes that LoRA was evaluated by “scal[ing] up to GPT-3 with 175 billion parameters,” but much of the rest is off-topic, focusing on unrelated limitations, latency, and experiment scope rather than the requested VRAM, checkpoint-size, and throughput gains."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on quantifying LoRA’s VRAM, checkpoint size, and training-throughput gains for GPT-3 175B versus full fine-tuning, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "If RNNs/CNNs vanished overnight, how might Transformer’s attention-only design affect MT speed/quality?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The paper says the Transformer, which is based entirely on attention and replaces recurrent layers, can be trained “significantly faster” than architectures based on recurrent or convolutional layers for translation tasks. [2] It also says this attention-only model achieved a new state of the art on WMT 2014 English-to-German and English-to-French translation, and in English-to-German it outperformed all previously reported ensembles. [2] More specifically, one passage reports 28.4 BLEU on English-to-German, beating the existing best results by over 2 BLEU, and 41.0 BLEU on English-to-French as a new single-model state of the art. [3]\n\nSo, if RNNs/CNNs vanished overnight, this evidence suggests the Transformer’s attention-only design would still support faster training and strong or state-of-the-art translation quality. [2][3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top-ranked retrieval context nodes all directly support the input: node 1 says the Transformer is \"based entirely on attention\" and can be \"trained significantly faster than architectures based on recurrent or convolutional layers,\" node 2 adds that it trains \"significantly faster\" and reaches \"a new state of the art,\" and node 3 confirms it is \"more parallelizable\" and needs \"significantly less time to train\" while improving BLEU scores. There are no irrelevant nodes ranked above relevant ones, so precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by nodes 2 and 3 in retrieval context: they describe the Transformer as attention-only, more parallelizable, and significantly faster to train than recurrent or convolutional architectures, which supports the faster-training claim; they also report new state-of-the-art BLEU results on WMT 2014 En-De and En-Fr, which supports the higher-quality translation claim."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7272727272727273,
+          "passed": true,
+          "reason": "The score is 0.73 because the context does address the core Transformer/MT question, noting it was “the first sequence transduction model based entirely on attention” and that it can be “trained significantly faster than architectures based on recurrent or convolutional layers,” with “better quality” evidence like “new state of the art” BLEU scores. However, some retrieved text is off-target, including fragments like “The statement is just a sequence of numbers and fragments…” and unrelated acknowledgements/code notes, so the match is strong but not perfect."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on how attention-only Transformers would affect machine translation speed and quality, using the research papers as requested, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output fully aligns with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "What BLEU scores did Transformer achieve on WMT14 En-De and WMT14 En-Fr?\nAnswer using the uploaded research papers.",
+      "generated_answer": "Transformer achieved a BLEU score of **27.3** on **WMT14 En-De** and **38.1** on **WMT14 En-Fr**. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked first: node 1 says \"Transformer (big)\" gets \"28.4\" BLEU on \"EN-DE\" and \"41.0\" on \"EN-FR\", and node 2 reinforces this with \"a new state-of-the-art BLEU score of 28.4\" on WMT 2014 English-to-German and \"41.0\" on WMT 2014 English-to-French. The unrelated node 3 is correctly placed lower since it is about \"WebNLG\" and GPT-2 adaptation methods, not Transformer results on WMT14."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 and node 2 in retrieval context, which together state Transformer big achieved 28.4 BLEU on WMT 2014 English-to-German and 41.0 BLEU on WMT 2014 English-to-French. Great match!"
+        },
+        "Contextual Relevancy": {
+          "score": 0.4166666666666667,
+          "passed": false,
+          "reason": "The score is 0.42 because the context does include the needed BLEU values—\"Transformer (big) 28.4 41.0\" and \"our big model achieves a BLEU score of 41.0\"—but much of it is off-topic, such as \"Training took 3.5 days on 8 P100 GPUs\" and \"used dropout rate Pdrop = 0.1, instead of 0.3,\" so the match is only partially relevant."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response would be fully relevant to the question and there are no irrelevant statements to reduce its quality. It directly addresses the BLEU scores for Transformer on WMT14 En-De and WMT14 En-Fr using the provided papers."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Compare LoRA vs full fine-tuning in task-specific params, weight updates, and inference latency.\nAnswer using the uploaded research papers.",
+      "generated_answer": "LoRA uses far fewer task-specific trainable parameters than full fine-tuning; for GPT-3 175B, it can reduce the number of trainable parameters by 10,000 times compared with Adam-based full fine-tuning. [2]\n\nIn terms of weight updates, full fine-tuning updates the model weights directly, while LoRA reparameterizes adaptation by training only low-rank matrices A and B and then forming the update as \\(W = W_0 + BA\\). [1][2] The paper also says LoRA does not require the accumulated gradient update to weight matrices to have full rank during adaptation, and that increasing LoRA’s rank can make it roughly converge toward the original model’s expressiveness. [1]\n\nFor inference latency, LoRA has no additional inference latency when its learned matrices are merged into the weights for deployment, so inference can proceed as usual. [1][2] The paper also notes a limitation: if the LoRA modules are not merged, batching different tasks in a single forward pass is not straightforward. [3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked perfectly at the top: node 1 and node 2 both directly support that LoRA trains far fewer task-specific parameters, with phrases like \"greatly reducing the number of trainable parameters\" and \"we only train A and B,\" and node 3 reinforces the comparison on weight updates and latency by noting \"W = W0 + BA\" and \"no additional inference latency.\" Since there are no irrelevant nodes ranked above these relevant nodes, the ranking is ideal."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which states LoRA greatly reduces trainable parameters compared with full fine-tuning; node 1 and node 2 also support the detailed claims about freezing pretrained weights, training only low-rank matrices, and having no additional inference latency, so every part of the expected output is covered."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7692307692307693,
+          "passed": true,
+          "reason": "The score is 0.77 because the context includes strong matches for the comparison, such as \"We only train A and B,\" \"No Additional Inference Latency,\" and \"We also observe a 25% speedup during training ... compared to full fine-tuning,\" but it also contains some off-topic material like \"matrix notation details,\" \"repository availability,\" and \"deployment/storage details\" that do not directly answer the request."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the comparison of LoRA vs full fine-tuning in task-specific parameters, weight updates, and inference latency, with no irrelevant content included. It is as relevant as possible and directly follows the paper-based input."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output is fully consistent with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Why are full FT and adapters impractical for GPT-3 175B, incl. storage, GPU mem, latency?\nAnswer using the uploaded research papers.",
+      "generated_answer": "Full fine-tuning (FT) and adapters are impractical for GPT-3 175B because they are operationally inefficient to deploy and incur extra memory/latency costs. [2]\n\nFor adapters, the issue is not mainly parameter count but inference overhead: even though adapter layers can have very few parameters, they must be processed sequentially, which increases latency in online inference where batch size is typically one. [1] This latency increase is noticeable even on a single GPU, and it gets worse when the model is sharded because the extra depth requires more synchronous GPU operations. [1]\n\nFor full FT, the evidence says deployment would require storing the entire fine-tuned model for each task, which is very large. [2] It gives an example that for GPT-3 175B, storing 100 separately fine-tuned models would require about 100 × 350GB ≈ 35TB, whereas storing one pre-trained model plus 100 task-specific adapted models would be far smaller. [3] The paper also notes that during deployment you still need the 350GB base model. [3]\n\nOn GPU memory and throughput, the evidence says that with GPT-3 175B and the same number of weight shards for model parallelism, LoRA achieved 43.1 tokens/s per V100 GPU, compared with 32.5 tokens/s per V100 GPU for full fine-tuning. [3] This supports that full FT is less efficient in training throughput under the same sharding setup. [3]\n\nSo, based on the papers: full FT is impractical mainly because of very large per-task storage and inefficient deployment, while adapters are impractical because they increase inference latency due to sequential processing and extra synchronization when sharded. [1][2][3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the three retrieval context nodes are all relevant and already ranked well: node 1 directly explains adapter latency with \"processed sequentially\" and \"more synchronous GPU operations\" for online inference, node 2 supports the storage advantage with \"only need to store and load a small number of task-specific parameters,\" and node 3 covers the full fine-tuning burden with \"We still need the 350GB model during deployment\" and \"GPT-3 175B.\" There are no irrelevant nodes placed above relevant ones, so the ranking is already optimal."
+        },
+        "Contextual Recall": {
+          "score": 0.6666666666666666,
+          "passed": false,
+          "reason": "The score is 0.67 because sentence 1 is well supported by nodes 1 and 3 in retrieval context, which mention GPT-3 175B fine-tuning/deployment cost, storing a separate full checkpoint per task, and the large deployment footprint. Sentence 2 is also mostly supported by node 1 and node 3, which cover sequential adapter inference latency and added synchronous GPU communication in sharded/model-parallel setups. However, the final claim in sentence 2 about adapters not being bypassed or merged into base weights at inference is not attributed to any node in retrieval context, so one key detail is missing."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8461538461538461,
+          "passed": true,
+          "reason": "The score is 0.85 because the context contains several directly relevant points on why adapters can hurt deployment, such as “adapters have to be processed sequentially” and “can noticeably increase latency,” plus the storage benefit that “storing 100 adapted models only requires 350GB + 35MB * 100 ≈354GB as opposed to 100 * 350GB ≈35TB.” However, some material is only loosely related or about other settings, e.g. “a GPT-2 baseline that 'adapts just the last two layers (FTTop2)'” and a partial fragment that “does not directly answer why full FT and adapters are impractical for GPT-3 175B.”"
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addressed the question using the research papers and did not include any irrelevant statements. It is already at the maximum score since there was nothing off-topic to reduce relevance."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "How do seq2seq parametric memory, DPR retrieval, and Wikipedia dense-index jointly form RAG?\nAnswer using the uploaded research papers.",
+      "generated_answer": "RAG combines a pre-trained seq2seq transformer as the parametric-memory generator with a non-parametric memory in the form of a dense vector index of Wikipedia, and it accesses that index through a pre-trained neural retriever, specifically DPR. [2][3] The retriever uses maximum inner product search to find the top-K documents conditioned on the input, and the seq2seq model conditions on those retrieved latent documents together with the input to generate the output. [2][1] RAG treats the retrieved documents as latent variables and marginalizes over predictions made with different documents using a top-K approximation. [1][2]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top 3 nodes in retrieval contexts are all relevant and correctly ordered, so there are no irrelevant nodes ranked above relevant ones. Node 1 directly explains that the retriever (DPR) provides latent documents and the seq2seq model conditions on them; Node 2 states that the parametric memory is a pre-trained seq2seq transformer and the non-parametric memory is a dense vector index of Wikipedia accessed by a neural retriever; Node 3 reinforces that RAG combines pre-trained parametric and non-parametric memory with a dense Wikipedia index. This perfect ranking means the relevant evidence is already at the top, so the score cannot be higher."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all sentences are fully supported by the retrieval context: sentence 1 is covered by node 1 (RAG’s three-part setup with BART, DPR, and Wikipedia dense index), sentence 2 is covered by nodes 1 and 2 (DPR retrieves top-K Wikipedia passages and the seq2seq generator conditions on them), and sentence 3 is covered by nodes 1 and 2 as well (retrieved documents are treated as latent variables and marginalized over)."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8333333333333334,
+          "passed": true,
+          "reason": "The score is 0.83 because the context does explain how RAG is formed by saying the “retriever (Dense Passage Retriever [26], henceforth DPR) provides latent documents” and “the seq2seq model (BART [32]) then conditions on these latent documents,” plus that “the non-parametric memory is a dense vector index of Wikipedia.” However, some retrieved material is only tangential, such as the “top-K approximation” inference details, “memory networks,” and “we have only explored open-domain extractive question answering,” which do not directly answer the user’s question."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response would be fully relevant to the question and the provided papers, directly explaining how seq2seq parametric memory, DPR retrieval, and Wikipedia dense-index combine to form RAG without any irrelevant content. It cannot be higher than perfect, but it is already maximally aligned with the input."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Which task types did RAG excel on—SOTA open-domain QA, stronger knowledge-intense generation, and FEVER fact verification?\nAnswer using the uploaded research papers.",
+      "generated_answer": "RAG showed strong results on open-domain QA, where Table 1 reports that RAG-Seq. and RAG-Token outperform the other listed open-book models on the NQ, TQA, WQ, and CT test sets. [3] It also performed well on generation tasks, with Table 2 showing improved scores over BART on Jeopardy, MS-MARCO, and FEVER-generation-related metrics. [3] For FEVER fact verification, the paper says BM25 performed best, and RAG’s FEVER label accuracies were 72.5 (FEVER-3) and 89.5 (FEVER-2), which are below the FEVER state-of-the-art values shown in the table. [2][3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all retrieved nodes in retrieval contexts are relevant and correctly ordered at ranks 1, 2, and 3, so there are no irrelevant nodes ranked above relevant ones. Rank 1 directly supports the open-domain QA claim with \"On all four open-domain QA\" and strong results on NQ, TQA, WQ, and CT; rank 2 supports FEVER with \"For FEVER\" and the evaluation discussion; rank 3 adds complementary evidence for the same task types via Table 1 and Table 2, including \"Jeopardy,\" \"MSMARCO,\" and \"FEVER-3/FEVER-2.\""
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 and node 3 in retrieval context through the open-domain QA results on Natural Questions, WebQuestions, and CuratedTrec; sentence 2 is supported by node 3 via the Table 2 comparison with BART on MS-MARCO and Jeopardy generation; and sentence 3 is supported by node 1 and node 3 through the FEVER evaluation and label-accuracy results. All sentences are attributable, so recall is complete."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7142857142857143,
+          "passed": true,
+          "reason": "The score is 0.71 because the context does mention the target task areas—\"Open-domain Question Answering,\" \"Table 2: Generation and classification Test Scores,\" and FEVER details like \"We map FEVER class labels\"—but much of it is still only loosely related, since some statements are about setup or evaluation rather than explicitly saying RAG excelled on \"SOTA open-domain QA, stronger knowledge-intense generation, and FEVER fact verification.\""
+        },
+        "Answer Relevancy": {
+          "score": 0.8571428571428571,
+          "passed": true,
+          "reason": "The score is 0.86 because the answer mostly addresses the requested task types for RAG, but it is slightly lower since it includes a misleading statement about BM25 performing best, which shifts away from the paper-based point about RAG excelling on FEVER fact verification. Still, the response remains largely relevant and on-topic."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Why does Transformer replace RNN/CNNs with self-attn, and what parallelization/dependency gains result?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The Transformer replaces recurrent and convolutional layers because it is a simple architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. [1] The paper says it is the first transduction model relying entirely on self-attention to compute input and output representations without using sequence-aligned RNNs or convolution. [2]\n\nThe motivation for self-attention is to improve three things: total computational complexity per layer, the amount of computation that can be parallelized, and the path length between long-range dependencies. [3] The paper explicitly notes that shorter paths between positions make long-range dependencies easier to learn. [3]\n\nSo, the gains claimed are that the model is more parallelizable and has shorter paths for long-range dependencies, which helps learning those dependencies. [1][3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieval contexts are perfectly ordered: node 1, node 2, and node 3 are all relevant and directly support the answer with quotes like \"based solely on attention mechanisms, dispensing with recurrence and convolutions entirely,\" \"more parallelizable,\" and \"the amount of computation that can be parallelized\" / \"the path length between long-range dependencies.\" Since there are no irrelevant nodes placed above relevant ones, there is no need for a lower score."
+        },
+        "Contextual Recall": {
+          "score": 0.7,
+          "passed": true,
+          "reason": "The score is 0.70 because sentence 1 is well supported by nodes 1, 2, and 3 in retrieval context, which say the Transformer uses only self-attention and dispenses with recurrence/convolutions, making it more parallelizable. Sentence 4 is also supported by node 1’s note that the model is superior in quality, more parallelizable, and requires significantly less training. Sentence 5 is supported by node 3, which explains shorter paths between long-range dependencies and easier learning. However, sentence 2 is not directly supported because no node explicitly says RNNs compute hidden states step by step or that their training cannot be efficiently parallelized, sentence 3 is not directly supported because the context does not explicitly say CNNs parallelize better, and sentence 6 is only partially supported since no node states the constant-operation claim for self-attention."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8,
+          "passed": true,
+          "reason": "The score is 0.80 because the context does answer the core question with statements like \"proposes the Transformer architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely\" and that it is \"more parallelizable and requiring significantly less training time,\" but some retrieved material is off-target, such as \"end-to-end memory networks\" and the generic \"encoder-decoder structure\" that \"does not address the question of why Transformer replaces RNN/CNNs with self-attention or the parallelization/dependency gains asked in the input.\""
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response is fully relevant to the question, stays focused on why Transformers use self-attention instead of RNNs/CNNs, and addresses the parallelization and dependency advantages without any irrelevant content. Great job staying on-topic."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "What Transformer advantages over RNNs are claimed for training speed, parallelization, time, and BLEU?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The paper claims the Transformer is “more parallelizable” and “requiring significantly less time to train” than recurrent models such as RNNs/LSTMs/GRUs. [1] It also says the model achieves 28.4 BLEU on WMT 2014 English-to-German, improving over the existing best results, including ensembles, by over 2 BLEU. [1] Table 2 reports Transformer (big) scores of 28.4 BLEU on EN-DE and 41.0 BLEU on EN-FR, at a fraction of the training cost of prior models. [2]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked first: node 1 directly says the Transformer is \"more parallelizable\" and needs \"signiﬁcantly less time to train,\" while node 2 supports the BLEU results with \"better BLEU scores\" and \"Transformer (big) 28.4\" / \"41.0.\" The irrelevant node at rank 3 is about \"BERTLARGE\" and pre-training, so it should be lower since it does not address Transformer advantages over RNNs for training speed, parallelization, time, or BLEU."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because every sentence in the expected output is fully supported by the retrieval context: sentence 1 is backed by node(s) in retrieval context 1 and 2 describing more parallelization by removing recurrence; sentence 2 is supported by node(s) 1 and 2 stating the model reaches state-of-the-art after 3.5 days on 8 GPUs; sentence 3 is supported by node 1 noting significantly less training time; sentence 4 is supported by node(s) 1 and 2 with the 28.4 BLEU WMT 2014 English-to-German result; and sentence 5 is supported by node(s) 1 and 2 with the 41.0 BLEU English-to-French state of the art. Great coverage overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.35714285714285715,
+          "passed": false,
+          "reason": "The score is 0.36 because the context only partially matches the question: several quoted lines do address Transformer advantages, such as being \"more parallelizable and requiring significantly less time to train\" and achieving better \"BLEU scores\" at \"a fraction of the training cost,\" but much of the retrieved material is irrelevant, including statements about BERT, \"Results 6.1 Machine Translation,\" and generic claims that do not mention training speed, parallelization, time, or BLEU."
+        },
+        "Answer Relevancy": {
+          "score": 0.8571428571428571,
+          "passed": true,
+          "reason": "The score is 0.86 because the answer mostly addressed the requested Transformer advantages over RNNs for speed, parallelization, time, and BLEU, but it included an irrelevant EN-FR BLEU detail that was outside the specific EN-DE comparison asked for. That keeps it strong but not fully on-target."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output aligns fully with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Why can BERT’s feature-based approach support non-Transformer task models and cheaper repeated experiments?\nAnswer using the uploaded research papers.",
+      "generated_answer": "BERT’s feature-based approach can support non-Transformer task models because it uses **fixed features extracted from the pretrained model**, and the paper notes that **not all tasks can be easily represented by a Transformer encoder architecture**, so some tasks **require a task-specific model architecture to be added**. [1][2]\n\nIt can support cheaper repeated experiments because the paper says you can **pre-compute an expensive representation of the training data once** and then **run many experiments with cheaper models on top of this representation**. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant information appears at the top of the retrieval contexts: node 1 and node 2 both directly answer the question by explaining that the feature-based approach uses \"fixed features ... from the pretrained model,\" supports cases where \"not all tasks can be easily represented by a Transformer encoder architecture,\" and allows you to \"pre-compute an expensive representation ... once and then run many experiments with cheaper models on top of this representation.\" The irrelevant node 3 is ranked lower, which is appropriate since it only says \"BERT is conceptually simple and empirically powerful\" and reports results without addressing non-Transformer task models or cheaper repeated experiments."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which matches the fixed feature-based BERT approach and the idea that not all tasks are easily modeled with a Transformer encoder. Sentences 2 and 3 are also supported by node 1 in retrieval context, which states the computational benefit of pre-computing expensive representations once and then running many cheaper experiments on top. Great recall overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5625,
+          "passed": false,
+          "reason": "The score is 0.56 because the retrieval context includes directly useful evidence like “The feature-based approach, where fixed features are extracted from the pretrained model, has certain advantages” and “There are major computational benefits to pre-compute an expensive representation... and then run many experiments with cheaper models,” which supports the question. However, several chunks are irrelevant, such as “This is a table/header fragment” and “The statement is about BERT's benchmark results,” so the context is only moderately relevant overall."
+        },
+        "Answer Relevancy": {
+          "score": 0.7142857142857143,
+          "passed": true,
+          "reason": "The score is 0.71 because the answer addresses the main idea, but it includes some broader discussion about task representation and Transformer encoders that doesn’t directly explain BERT’s feature-based benefits for non-Transformer models or cheaper repeated experiments. It is still fairly relevant since it stays on the topic and captures part of the underlying reasoning, just not with full focus or precision."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "List BERTBASE and No NSP dev scores for MNLI-m, QNLI, SQuAD, plus NSP-removal drops.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The evidence does not give a “No NSP” dev score table for BERTBASE, so I can only report the BERTBASE dev scores shown and note that the NSP-removal drops are not provided in the passages. [3]\n\n- MNLI-m dev score for BERTBASE: 84.6 [3]\n- QNLI dev score for BERTBASE: 90.5 [3]\n- SQuAD dev score for BERTBASE: 80.8 EM / 88.5 F1 on SQuAD 1.1 [2]\n\nThe passages do not include the corresponding “No NSP” dev scores or the NSP-removal drops for MNLI-m, QNLI, or SQuAD. [2][3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are perfectly ranked at the top: node 1 cites BERTBASE GLUE results for MNLI and QNLI, node 2 gives the exact SQuAD dev score, and node 3 also contains the exact BERTBASE dev scores. Since all top-ranked nodes are useful and there are no irrelevant nodes above them, nothing needs to be ranked lower."
+        },
+        "Contextual Recall": {
+          "score": 0.0,
+          "passed": false,
+          "reason": "The score is 0.00 because sentence 1 has no matching BERTBASE dev score table in nodes in retrieval context 1–4, sentence 2 has no corresponding “No NSP dev scores” values in any node, and sentence 3 is also unsupported since none of nodes 1–4 contains an explicit “NSP-removal drops” section with 0.5/3.5/0.6."
+        },
+        "Contextual Relevancy": {
+          "score": 0.0,
+          "passed": false,
+          "reason": "The score is 0.00 because the retrieval context provides no relevant support for the request—it's mostly about unrelated results like \"RoBERTa results on tasks like 'MNLI', 'QNLI', and 'SST-2'\" or generic notes such as \"Table 2: SQuAD 1.1 results,\" while the input specifically asks for \"BERTBASE and No NSP dev scores for MNLI-m, QNLI, SQuAD, plus NSP-removal drops.\""
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully on task and directly addresses the requested dev scores for MNLI-m, QNLI, and SQuAD, along with the NSP-removal drops, without adding irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "How do bidir Trm, MLM, and NSP jointly define BERT pre-train vs GPT/ELMo?\nAnswer using the uploaded research papers.",
+      "generated_answer": "BERT is defined by a **bidirectional Transformer (Trm)** pre-trained with **masked language modeling (MLM)** and **next sentence prediction (NSP)**, so its representations are jointly conditioned on both left and right context in all layers and are used in a fine-tuning approach. [1][3]\n\nBy contrast, OpenAI GPT uses a **left-to-right Transformer** pre-training setup, not bidirectional MLM, and is described as a fine-tuning approach as well. [1][3]\n\nELMo uses a **concatenation of independently trained left-to-right and right-to-left LSTMs** to generate features for downstream tasks, so it is a feature-based approach rather than BERT-style fine-tuning. [1][3]\n\nThe paper also states that removing **NSP** hurts performance, and that a left-context-only **LTR** model performs worse than the **MLM** model, especially on MRPC and SQuAD, showing that both bidirectionality via MLM and the NSP task are important parts of BERT pre-training. [2]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all 3 retrieval context nodes are relevant and correctly ranked at the top: node 1 directly states that \"BERT uses a bidirectional Transformer,\" \"OpenAI GPT uses a left-to-right Transformer,\" and \"ELMo uses the concatenation of independently trained left-to-right and right-to-left LSTMs,\" node 2 adds that the model was \"pre-trained without the NSP task\" and that \"The LTR model performs worse than the MLM model,\" and node 3 explains that \"the MLM objective enables the representation to fuse the left and the right context\" and that BERT uses \"a ‘next sentence prediction’ task.\" Since there are no irrelevant nodes above relevant ones, the ranking is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because every sentence in the expected output is fully supported by node 1 and node 2 in retrieval context: sentence 1 is covered by BERT’s bidirectional Transformer and joint left/right conditioning, sentence 2 by MLM and NSP, sentence 3 by GPT’s left-to-right Transformer, and sentence 4 by ELMo’s separate LSTMs plus the feature-based vs fine-tuning distinction. Great coverage!"
+        },
+        "Contextual Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieved passages directly answer the comparison: they say “BERT uses a bidirectional Transformer,” while “OpenAI GPT uses a left-to-right Transformer” and “ELMo uses the concatenation of independently trained left-to-right and right-to-left LSTMs.” They also explain that “BERT” is trained with “masked language model” and “next sentence prediction,” making the context fully aligned with the input."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the question using the research-paper context with no irrelevant statements, so it is completely relevant and could not reasonably be higher."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Define ReAct; explain how interleaved thoughts+actions use context/env feedback for better task-solving.\nAnswer using the uploaded research papers.",
+      "generated_answer": "ReAct augments an agent’s action space by adding language as an action space, so the agent can produce “thoughts” or reasoning traces in addition to normal actions. A thought does not affect the external environment directly and gives no observation feedback; instead, it updates the agent’s context, with the new context formed by appending the thought to the current context. [1]\n\nThe idea of interleaving thoughts and actions is that the language model decides when to reason and when to act, and the thoughts can be used to do things like decompose goals, make plans, inject commonsense knowledge, extract important information from observations, track progress, and adjust plans when exceptions arise. This lets the agent use both the current context and feedback from the environment across a trajectory to support future reasoning and acting. [1]\n\nThe paper says this setup is useful because ReAct integrates decision-making and reasoning in one model, and it works across diverse tasks by allowing flexible thought-action sequences. It also reports strong generalization and robustness in few-shot settings compared with methods that do only reasoning or only action generation. [2][3]\n\n",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top three nodes in retrieval contexts are all relevant and directly support the input: node 1 defines ReAct and explains how a thought \"does not affect the external environment\" while reasoning over the current context to update future steps, node 2 adds that the model decides the interleaving of thoughts and actions, and node 3 reinforces the benefits of reasoning and acting with feedback. There are no irrelevant nodes ranked above relevant ones, so nothing needs to be pushed lower."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which describes ReAct as interleaving reasoning traces (“thoughts”) with task-specific actions and notes that thoughts do not change the external environment. Sentence 2 is also supported by node 1, which lists how thoughts use context to decompose goals, track progress, extract key information, and inject commonsense. Sentence 3 is supported by node 1 and node 2, since node 1 says thoughts/observations update the context and node 2 reinforces the reasoning-and-acting loop. Sentence 4 is supported by node 1 and node 2 as well, which together describe the closed loop where reasoning improves action selection and actions provide feedback that improves reasoning."
+        },
+        "Contextual Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieved context directly explains ReAct and its interleaved reasoning/acting loop, including that \"a thought or a reasoning trace... leads to no observation feedback\" and that a thought \"update[s] the context ct+1 = (ct, at) to support future reasoning or acting,\" which matches the input exactly."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the request about defining ReAct and explaining how interleaved thoughts and actions use context and environment feedback for better task-solving, with no irrelevant statements."
+        },
+        "Faithfulness": {
+          "score": 0.8888888888888888,
+          "passed": true,
+          "reason": "The score is 0.89 because the actual output overstates the update mechanism by implying the new context is formed by simply appending the thought to the current context, while the context only says a thought updates the context for future reasoning or acting without specifying that exact method."
+        }
+      }
+    },
+    {
+      "question": "If BERTBASE lost NSP or switched to LTR LM, how would MNLI/QNLI/MRPC/SST-2/SQuAD scores change?\nAnswer using the uploaded research papers.",
+      "generated_answer": "Compared with **BERTBASE**, **No NSP** changes the scores to **MNLI 83.9, QNLI 84.9, MRPC 86.5, SST-2 92.6, SQuAD 87.9** from **84.4, 88.4, 86.7, 92.7, 88.5** respectively. [3]\n\nCompared with **BERTBASE**, **LTR & No NSP** changes the scores to **MNLI 82.1, QNLI 84.3, MRPC 77.5, SST-2 92.1, SQuAD 77.8** from **84.4, 88.4, 86.7, 92.7, 88.5** respectively. [3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 0.3333333333333333,
+          "passed": false,
+          "reason": "The score is 0.33 because the only truly relevant evidence appears in node 3, which directly contains the BERTBASE ablation table with 'BERTBASE 84.4 88.4 86.7 92.7 88.5', 'No NSP 83.9 84.9 86.5 92.6 87.9', and 'LTR & No NSP 82.1 84.3 77.5 92.1 77.8'. The score is not higher because nodes 1 and 2 are irrelevant nodes ranked before the useful one: node 1 discusses 'RoBbase/RoBlarge' task scores and says it 'does not help answer how 'BERTBASE' changes under 'No NSP' or 'LTR & No NSP'', while node 2 covers SELF-RAG with 'retrieval, critique, and 'PQA', 'Med', 'AS'' and is unrelated to BERT pretraining ablations. It is at 0.33 because the relevant node is present but ranked behind two irrelevant nodes, so precision is low despite the correct table being included."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node(s) in retrieval context 1 and 4, where node 1 gives the Table 5/BERTBASE setup and node 4 provides the exact BERTBASE, No NSP, and LTR & No NSP values for MNLI, QNLI, MRPC, SST-2, and SQuAD; sentence 2 is also directly supported by node 4’s numbers and the observed performance pattern."
+        },
+        "Contextual Relevancy": {
+          "score": 0.16161616161616163,
+          "passed": false,
+          "reason": "The score is 0.16 because most of the retrieved text is unrelated SELF-RAG or other benchmark material, e.g. \"SELF-RAG (50k)\", \"PubHealth\", and \"Llama2-FT7B\". Only one snippet is truly relevant: \"Table 5 reports BERTBASE development set scores... under the settings BERTBASE, No NSP, LTR & No NSP\" and \"The paper demonstrates the importance of the deep bidirectionality of BERT,\" which partially matches the user’s BERTBASE NSP/LTR question."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses how BERTBASE performance changes under NSP removal or LTR LM across the requested tasks, using the research papers, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Contrast ReAct vs CoT/prior work: action use, obs feedback, interleaving, interactive DM role.\nAnswer using the uploaded research papers.",
+      "generated_answer": "ReAct augments the agent’s action space to include both environment actions and language, i.e. \\(\\hat{A} = A \\cup L\\), so it can reason and act within the same loop. [3] In contrast, the evidence says Inner Monologue’s “inner monologue” is limited to observations of the environment state and what needs to be completed for the goal to be satisfied, rather than a flexible reasoning trace. [2]\n\nReAct also uses feedback from the environment in a closed-loop system, and the text says Inner Monologue was the first prior work to demonstrate such a closed-loop system that ReAct builds on. [1] The evidence further says ReAct’s reasoning traces are “flexible and sparse,” allowing diverse reasoning types for different tasks, whereas IM-style prompting uses “dense external feedback.” [2]\n\nOn interleaving, the evidence indicates ReAct is a “synergizing reasoning + acting” method in which language is part of the action space and the agent interacts with the environment over time. [3] However, the provided passages do not explicitly describe CoT in comparison to ReAct, so I cannot make a grounded claim about CoT specifically beyond what is stated here.",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are correctly ranked first: node 1 directly contrasts ReAct with prior work using the quotes \"synergizing reasoning and acting,\" \"Inner Monologue does not truly comprise of inner thoughts,\" and \"closed-loop system,\" node 2 reinforces the comparison with the quote \"the reasoning traces in ReAct for decision making is flexible and sparse,\" and node 3 adds the mechanics with \"we augment the agent’s action space to A ∪ L\" and \"observation ot\" / \"action at.\" Since all three nodes are relevant and there are no irrelevant nodes above them, there is no ranking penalty."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which explicitly matches ReAct as combining reasoning with acting instead of isolated text-only reasoning. Sentences 2, 3, and 4 are also directly supported by nodes 2 and 3 in retrieval context, covering the expanded action space, observations fed back from the environment, and the interleaving thought-action-observation loop. Sentence 5 is likewise supported by nodes 1 and 2 in retrieval context, which describe ReAct as a closed-loop, interactive decision-making approach that helps gather information, update plans, and act under uncertainty. Great match overall!"
+        },
+        "Contextual Relevancy": {
+          "score": 0.7222222222222222,
+          "passed": true,
+          "reason": "The score is 0.72 because the context does contain useful ReAct-vs-prior-work details like “ReAct builds on” Inner Monologue, “within a closed-loop system,” and “implemented as injected feedback from the environment,” which relate to action/observation interaction. However, several retrieved statements are too broad or off-target for the full contrast requested, such as “language as a fundamental cognitive mechanism” and “progress in LLMs has also inspired...,” so the match is relevant but incomplete."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addressed the comparison between ReAct and CoT/prior work using the research papers, with no irrelevant statements or off-topic content. It is already at the maximum since everything provided was relevant and on task."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Enumerate E.1 success/failure modes with their exemplar QA prompts from the ICLR 2023 appendix.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The provided evidence shows only one explicit example under “Success: True positive” in E.1, and it is from a ReAct QA prompt. [1] The exemplar question is: “Author David Chanoff has collaborated with a U.S. Navy admiral who served as the ambassador to the United Kingdom under which President?” [1] The example’s answer is “Bill Clinton.” [1]\n\nThe evidence also shows that E.1 is titled “SUCCESS AND FAILURE MODES ANALYSIS” and says they provide examples corresponding to the success and error mode analysis in Sec. 3.3, but it does not include any other full success/failure exemplars beyond the one visible snippet. [1]\n\nSo, based on the uploaded paper text, I can enumerate only this one exemplar QA prompt:\n1. Success / True positive — “Author David Chanoff has collaborated with a U.S. Navy admiral who served as the ambassador to the United Kingdom under which President?” → “Bill Clinton.” [1]\n\nThe evidence does not provide the other success/failure-mode exemplar QA prompts, so I can’t list them. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the two relevant nodes in retrieval contexts are ranked first and second, and both directly support the requested E.1 success/failure modes with exemplar QA prompts from the ICLR 2023 appendix, including the quoted section heading \"E.1 SUCCESS AND FAILURE MODES ANALYSIS\" and the exemplars \"Success: True positive\" and \"CoT Question: What was the name of the team that represented an Arizona university in...\". The irrelevant node is already placed lower at rank 3, where its focus on \"3.2 METHODS\" and \"ReAct Prompting\" makes it less relevant to the specific appendix enumeration request."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because node 1 in retrieval context fully covers every sentence in the expected output: sentence 1’s success/failure modes and examples are matched exactly, and sentences 2 through 6 are each directly supported by the corresponding quoted items in node 1."
+        },
+        "Contextual Relevancy": {
+          "score": 0.3076923076923077,
+          "passed": false,
+          "reason": "The score is 0.31 because the context only partially matches the request: it does contain the appendix heading \"E.1 SUCCESS AND FAILURE MODES ANALYSIS\" and a few exemplar prompts like \"Question: Author David Chanoff has collaborated with a U.S. Navy admiral...\" and \"CoT Question: What was the name of the team...\", but much of the retrieved text is unrelated trace material, including \"Action 1: Search[David Chanoff]\", \"Observation 1: David Chanoff is a noted author...\", and other prompt traces that are not the requested E.1 enumeration."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stayed fully focused on the requested ICLR 2023 appendix content and there were no irrelevant statements. It is already at the maximum since everything addressed the input directly."
+        },
+        "Faithfulness": {
+          "score": 0.875,
+          "passed": true,
+          "reason": "The score is 0.88 because the only contradiction is a minor formatting mismatch: the actual output presents Section E.1 as all caps “SUCCESS AND FAILURE MODES ANALYSIS,” while the retrieval context names it “Success and Failure Modes Analysis.”"
+        }
+      }
+    },
+    {
+      "question": "Identify David Chanoff’s admiral collaborator and name the President under whom he was UK ambassador.\nAnswer using the uploaded research papers.",
+      "generated_answer": "David Chanoff’s U.S. Navy admiral collaborator was William J. Crowe, and he served as ambassador to the United Kingdom under President Bill Clinton. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant node in retrieval contexts is ranked first, and it directly states that David Chanoff’s admiral collaborator is \"William J. Crowe\" and that he served as UK ambassador under \"President Bill Clinton.\" The irrelevant nodes are correctly placed lower: node 2 only discusses a generic evaluation prompt and the UK prime minister, and node 3 is about \"Rory Tapner\" and his biography, so neither competes with the needed answer."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported: node 1 matches David Chanoff’s collaboration with William J. Crowe, and node 2 explicitly states that Crowe served as U.S. ambassador to the United Kingdom under President Bill Clinton. Great match!"
+        },
+        "Contextual Relevancy": {
+          "score": 0.25,
+          "passed": false,
+          "reason": "The score is 0.25 because most of the retrieval is unrelated metadata like \"Published as a conference paper at ICLR 2023\" and generic labels such as \"E\" and \"ReAct,\" which do not help answer the query. However, it does contain the key relevant trace: \"Action 2: Search[William J. Crowe]\" and \"William J. Crowe served as the ambassador to the United Kingdom under President Bill Clinton,\" which directly supports the answer."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses both parts of the question using the provided research papers, with no irrelevant statements to lower its relevance."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Compare short-form vs long-form generation tasks: which datasets belong to each category?\nAnswer using the uploaded research papers.",
+      "generated_answer": "Short-form generation tasks include PopQA and TriviaQA-unfiltered. [1]  \nLong-form generation tasks include a biography generation task and ALCE-ASQA. [2]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked first: node 1 clearly states \"Short-form generations tasks include two open-domain question answering (QA) datasets, PopQA ... and TriviaQA-unfiltered,\" and node 2 states \"Long-form generation tasks include a biography generation task ... and a long-form QA task ALCE-ASQA,\" which directly answer the question. The irrelevant node 3 appears only after both relevant nodes and is about \"MNLI\" and \"QQP,\" so it is appropriately ranked lower."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because node(s) in retrieval context 1 and 2 fully support both sentences: sentence 1 matches the short-form tasks PopQA and TriviaQA-unfiltered from node 1, and sentence 2 matches the long-form tasks Biography generation and ALCE-ASQA from node 2. Great retrieval coverage."
+        },
+        "Contextual Relevancy": {
+          "score": 0.3125,
+          "passed": false,
+          "reason": "The score is 0.31 because most of the retrieved material is off-topic, focusing on things like \"FactScore\", \"str-em\", \"MAUVE\", \"citation precision and recall\", \"GLUE benchmark experiments\", and \"natural language inference classification\" rather than the dataset split asked about. However, it does contain some directly relevant guidance, stating that \"Short-form generation tasks include two open-domain question answering (QA) datasets, PopQA and TriviaQA-unfiltered\" and that \"Long-form generation tasks include a biography generation task ... and a long-form QA task ALCE-ASQA\"."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully on task and directly answers the comparison using the provided research papers, with no irrelevant statements. It cannot be higher since 1.00 already indicates perfect relevance."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "From excerpt, specify PopQA wiki corpus/embeddings, OpenQA max tokens, FactScore baseline vs SELF-RAG token limits.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The excerpt does not specify the PopQA wiki corpus or embeddings. [1][2]\n\nFor Open-domain QA / OpenQA, the maximum new token length is 100 tokens. [2][3]\n\nFor FactScore, the maximum new token length is 500 for baselines and 200 for SELF-RAG at each segment level. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant information is ranked at the top in the retrieval contexts: node 1 and node 2 both directly support the needed OpenQA and FactScore token details, including \"For OpenQA datasets, we set the maximum new token number to 100 tokens.\" and \"500 for baselines and 200 for SELF-RAG at each segment level.\" The irrelevant node 3 is already placed last, and its focus on \"15 retrieved documents\" and \"greedy decoding\" does not address the PopQA corpus/embeddings or the requested token limits, so there is no lower-ranked distraction before the useful nodes."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 2 is directly supported by node 1, and sentence 3 is directly supported by node 1 as well; sentence 1 is supported by nodes 1 and 2 in retrieval context, with node 2 providing the Wikipedia-corpus basis and node 1 covering the related retrieval setup. All three sentences are attributable to the retrieval context, so the recall is perfect."
+        },
+        "Contextual Relevancy": {
+          "score": 0.23529411764705882,
+          "passed": false,
+          "reason": "The score is 0.24 because the context only partially matches the request: it includes useful limits like \"For FactScore, we set the maximum new token length to 500 for baselines and 200 for SELF-RAG\" and \"For OpenQA datasets, the maximum new token number is set to 100 tokens,\" but it still misses the exact PopQA wiki corpus/embeddings details and much of the rest is unrelated, e.g. \"all of the baseline output length is within 30-60 tokens\" and \"Table 5\"/\"the instructions used during evaluations\"."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the requested paper-based details about PopQA wiki corpus/embeddings, OpenQA max tokens, and FactScore baseline vs. SELF-RAG token limits, with no irrelevant content. It’s as strong as it can be since everything is on-topic and relevant."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "What is SELF-RAG, incl. on-demand retrieval, reflection-token critique, and citation accuracy gains?\nAnswer using the uploaded research papers.",
+      "generated_answer": "SELF-RAG is a framework that enhances the quality and factuality of LLMs through retrieval on demand and self-reflection. It trains the model to learn to retrieve, generate, and critique text passages and its own generation by predicting both normal vocabulary tokens and special “reflection tokens.” [2]\n\nOn-demand retrieval means the model decides at each segment whether factual grounding is needed: “No” means retrieval is unnecessary, “Yes” means retrieval is needed, and “continue to use evidence” means the model can keep using previously retrieved evidence. [3]\n\nThe reflection-token critique mechanism includes tokens for assessing aspects such as whether retrieved information is relevant and whether the generated content is supported by evidence. [3] The paper says human annotators found ISREL and ISSUP reflection-token predictions were mostly aligned with their assessments. [2]\n\nRegarding citation accuracy gains, the paper reports that SELF-RAG outperforms widely adopted RAG approaches “with higher citation accuracy,” and it also enables test-time customization such as balancing citation precision and completeness. [1] It further reports that SELF-RAG significantly outperforms pre-trained and instruction-tuned LLMs on six tasks, including retrieval-augmented ChatGPT on four tasks, and Llama2-chat and Alpaca on all tasks. [1][2]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieval contexts are perfectly ranked: the first node, second node, and third node in retrieval contexts are all relevant and directly support SELF-RAG, with phrases like \"enhance[s] the quality and factuality of LLMs through retrieval on demand and self-reflection,\" \"Given an input... an LM determines whether the continuation requires factual grounding,\" and \"retrieve, generate, and critique text passages and its own generation.\" There are no irrelevant nodes placed above relevant ones, so nothing should be ranked lower."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by nodes 1 and 2 in the retrieval context describing SELF-RAG as a Self-Reflective Retrieval-Augmented Generation framework that improves quality and factuality through on-demand retrieval and self-reflection; sentence 2 is supported by node 1’s on-demand retrieval behavior; sentence 3 is supported by nodes 2 and 3 covering reflection tokens, self-critique, and segment-level citation checking. No sentence is left unsupported, so the recall is perfect."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7916666666666666,
+          "passed": true,
+          "reason": "The score is 0.79 because the context includes strong, directly relevant SELF-RAG details like “This work introduces SELF-RAG, a new framework to enhance the quality and factuality of LLMs through retrieval on demand and self-reflection” and “Retrieval-on-demand ( Retrieve ): Given an input... an LM determines whether the continuation requires factual grounding,” plus citation-quality findings such as “significantly outperforms... with higher citation accuracy.” However, some retrieved text is only structural or unrelated, e.g. “RELATED WORK,” “Appendix Table 6 shows several annotated examples and explanations on assessments,” and “A.1” are just section markers/appendix labels rather than substantive answers."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses SELF-RAG, including on-demand retrieval, reflection-token critique, and citation accuracy gains, while staying focused on the uploaded research papers with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Compare SELF-RAG vs conventional RAG on retrieval timing, passage use, and self-critique/verification.\nAnswer using the uploaded research papers.",
+      "generated_answer": "SELF-RAG decides whether retrieval is needed during generation, and if so it emits a retrieval token to call the retriever on demand; conventional RAG “consistently retrieves a fixed number of documents for generation regardless of the retrieval necessity.” [1][3]\n\nSELF-RAG then processes multiple retrieved passages in parallel, evaluates their relevance, and generates task outputs from them; it can select among passages based on whether they are irrelevant, partially supported, or fully supported. [1][2]\n\nSELF-RAG also self-critiques its own output by generating critique tokens to judge whether the response segment is supported by the passage and to assess overall utility/factuality, which it uses to choose the best output. [1][2]\n\nIn contrast, the evidence says conventional RAG does not have this SELF-RAG-style second visit to generation quality, self-assessment, or built-in per-segment verification/citation mechanism. [3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top 3 nodes in retrieval contexts are all relevant and perfectly aligned with the input: node 1 states SELF-RAG \"first determines if augmenting the continued generation with retrieved passages would be helpful\" and then \"outputs a retrieval token that calls a retriever model on demand,\" node 2 says it \"concurrently processes multiple retrieved passages, evaluating their relevance\" and uses reflection tokens, and node 3 explicitly mentions \"critique tokens to criticize its own output\" plus factuality verification. There are no irrelevant nodes ranked above relevant ones, so the score cannot be higher and is already fully correct."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all three sentences are fully supported by the node(s) in retrieval context: sentence 1 matches node 1 on on-demand retrieval, sentence 2 matches nodes 1 and 2 on parallel evaluation of multiple passages, and sentence 3 matches nodes 2 and 3 on self-critique, verification, and citations. Great recall throughout!"
+        },
+        "Contextual Relevancy": {
+          "score": 0.7777777777777778,
+          "passed": true,
+          "reason": "The score is 0.78 because the context contains strong comparison details like \"SELF-RAG first determines if augmenting the continued generation with retrieved passages would be helpful\" and that conventional RAG \"consistently retrieves a fixed number of documents for generation regardless of the retrieval necessity,\" but it also includes irrelevant or incomplete material such as \"Our code and trained models are available at https://selfrag.github.io/\" and \"arXiv:2310.11511v1 [cs.CL] 17 Oct 2023\". Overall, it is mostly relevant to retrieval timing, passage use, and self-critique/verification, just not perfectly focused."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the comparison of SELF-RAG vs conventional RAG on retrieval timing, passage use, and self-critique/verification using the provided research papers, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output aligns perfectly with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "If BERT reused one pre-trained model, why’s fine-tuning cheap, and TPU/GPU time?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The evidence does not mention BERT reusing one pre-trained model in a way that answers why fine-tuning is cheap or anything about TPU/GPU time for BERT. [1][2][3]\n\nWhat the evidence does say is that fine-tuning adapts a pre-trained language model to downstream tasks by updating its parameters, and that the downside is that the resulting model has as many parameters as the original model. [3] It also says that for very large models like GPT-3 175B, this creates a deployment challenge because of the large checkpoint and hardware barrier, while parameter-efficient methods like LoRA train only A and B instead of all parameters. [2][3]\n\nThe only TPU/GPU-related timing information in the evidence is for GPT-3 175B: full fine-tuning has 32.5 tokens/s per V100 GPU, while LoRA has 43.1 tokens/s per V100 GPU with the same number of weight shards for model parallelism. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 0.0,
+          "passed": false,
+          "reason": "The score is 0.00 because the retrieved nodes in retrieval contexts are all irrelevant and none of the relevant BERT evidence is ranked above them. The 1st node only mentions that \"all model parameters undergo gradient updates\" and does not explain why BERT fine-tuning is cheap or mention TPU/GPU time. The 2nd node talks about retraining a pre-trained model and hardware barriers for GPT-3, but it still does not state that BERT fine-tuning is cheap because of a small task-specific output layer or provide the TPU/GPU time. The 3rd node says \"we only train A and B\" and contrasts fine-tuning with updating all parameters, but it is about parameter-efficient adaptation rather than the requested BERT fine-tuning cost/time details. Since no relevant node appears above these irrelevant nodes, the precision remains at 0.00."
+        },
+        "Contextual Recall": {
+          "score": 0.6666666666666666,
+          "passed": false,
+          "reason": "The score is 0.67 because sentence 1 is supported by nodes 1 and 3 in retrieval context, which indicate fine-tuning updates all parameters / only trains a small task-specific layer, and node 2 also supports the idea that fine-tuning can be relatively efficient; however, sentence 2 is not fully supported since no node in retrieval context gives the specific replication times of “at most 1 hour on a single Cloud TPU” or “a few hours on a GPU,” only more general training/deployment details."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8823529411764706,
+          "passed": true,
+          "reason": "The score is 0.88 because most of the context directly explains why fine-tuning can be efficient, such as \"Fine-tuning retrains a model pre-trained on general domains to a specific task\" and that it may involve \"learning just a subset of the parameters\" or \"updating all the parameters of the pre-trained model.\" It also supports the TPU/GPU cost angle with details like \"the training throughput for full fine-tuning is 32.5 tokens/s per V100 GPU\" and that large models have \"the same memory footprint as pre-training.\" However, a few snippets are irrelevant or incomplete, e.g. \"can be merged with the main weights during\" and \"we only need,\" which slightly lowers the score."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully on topic and directly addresses why fine-tuning is cheap and how TPU/GPU time is used, with no irrelevant statements. It’s already as relevant as possible."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output fully aligns with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Identify BERT's 2 pretrain corpora and explain why doc-level text was preferred.\nAnswer using the uploaded research papers.",
+      "generated_answer": "BERT was pretrained on the BooksCorpus and English Wikipedia. [1] The BooksCorpus is described as 800M words, and English Wikipedia as 2,500M words. [1][3] For Wikipedia, only text passages were extracted, while lists, tables, and headers were ignored. [1] Document-level corpus was preferred because it is critical for extracting long contiguous sequences, which a shuffled sentence-level corpus cannot provide. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 0.8333333333333333,
+          "passed": true,
+          "reason": "The score is 0.83 because the most relevant information is ranked well: node 1 in the retrieval contexts directly gives BERT’s two pretrain corpora, \"the BooksCorpus (800M words) and English Wikipedia (2,500M words),\" and explains why document-level text was preferred, while node 2 is an irrelevant bibliography entry that should be ranked lower. The score is not higher because node 3 in the retrieval contexts, although relevant for confirming the corpora with \"BERT is trained on the BooksCorpus (800M words) and Wikipedia (2,500M words),\" comes after the irrelevant node, so the ranking is not fully optimal even though the useful nodes are mostly prioritized."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because node 1 in retrieval context fully supports sentence 1 by explicitly naming BooksCorpus (800M words) and English Wikipedia (2,500M words), and fully supports sentence 2 by stating that a document-level corpus is critical for extracting long contiguous sequences and that a shuffled sentence-level corpus would break that continuity. Great match overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.3125,
+          "passed": false,
+          "reason": "The score is 0.31 because the context only partially answers the question: it does include that BERT uses \"the BooksCorpus (800M words)\" and \"English Wikipedia (2,500M words),\" and explains that \"It is critical to use a document-level corpus rather than a shuffled sentence-level corpus\" to get \"long contiguous sequences.\" However, much of the retrieved material is irrelevant, focusing on \"fine-tuning BERT and downstream tasks,\" \"text-pair applications and cross attention,\" and training-step details rather than the requested pretrain corpora and doc-level rationale."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the answer fully addresses BERT’s two pretraining corpora and explains the preference for document-level text, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "In RAG expts, specify wiki src, 100-word chunking, 21M docs, FAISS HNSW MIPS, train/test k.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The RAG experiments use the December 2018 Wikipedia dump as the non-parametric knowledge source. [2] Each Wikipedia article is split into disjoint 100-word chunks, producing a total of 21M documents. [2] They build a single MIPS index using FAISS with a Hierarchical Navigable Small World approximation for fast retrieval. [2]\n\nThe provided evidence does not state the train/test value of k. [2]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the two relevant nodes in retrieval contexts are ranked first and second, and they directly contain the needed details: \"the December 2018 dump,\" \"disjoint 100-word chunks,\" \"21M documents,\" and \"a single MIPS index using FAISS ... with a Hierarchical Navigable Small World approximation.\" The irrelevant node is already pushed to rank 3, which is appropriate since it only lists sections like \"SELF-RAG Details\" and \"Experimental Details\" and does not add the requested experiment specifics. This perfect ordering leaves no room for improvement."
+        },
+        "Contextual Recall": {
+          "score": 0.6666666666666666,
+          "passed": false,
+          "reason": "The score is 0.67 because sentence 1 is well supported by nodes 1 and 2 in retrieval context, which mention the December 2018 Wikipedia dump, disjoint 100-word chunks, and about 21M documents, and sentence 2 is also supported by node 2 with FAISS, MIPS, and HNSW. However, sentence 3 is only partially recoverable: the retrieval context does not provide the training k values, test-time selection from development data, or the appendix-specific retrieval counts (15/50/10), so that part cannot be fully attributed to any node in retrieval context."
+        },
+        "Contextual Relevancy": {
+          "score": 0.05,
+          "passed": false,
+          "reason": "The score is 0.05 because most of the retrieval context is unrelated headings and implementation notes, such as \"with FAISS is sufficiently fast on CPU\", \"compress[ing] the document index\", and \"APPENDIX A SELF-RAG Details\". Only one passage is relevant, which states: \"we use the December 2018 dump\", \"split into disjoint 100-word chunks\", \"a total of 21M documents\", and \"build a single MIPS index using FAISS ... with a Hierarchical Navigable Small World approximation\"; however, it still does not fully answer the requested train/test k details."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the requested RAG experiment details using the uploaded research papers, with no irrelevant statements."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Why use Thorough Decoding for short QA but Fast Decoding for longer Jeopardy/Open-MSMarco outputs?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The papers say that for open-domain QA, RAG-Sequence uses “Thorough Decoding” because “answers are generally short,” while for Open-MSMarco and Jeopardy question generation they use “Fast Decoding” for RAG-Sequence because “Thorough Decoding did not improve performance.” [3]\n\nThe papers also indicate that Jeopardy/Open-MSMarco are generation tasks with longer outputs than short QA answers, since they evaluate “open-MSMarco and Jeopardy question generation” separately from QA. [3] The passages do not give a deeper explanation beyond the stated performance-based choice. [3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked at the top: node 1 says they \"use the Thorough Decoding approach since answers are generally short,\" and node 2 says they \"use the Fast Decoding approach for RAG-Sequence models, as Thorough Decoding did not improve performance,\" which directly answers both parts of the question. The irrelevant node 3 is ranked lower, and it is less useful because it only discusses \"Human assessments for the Jeopardy Question Generation Task\" and n-gram ratios without explaining the decoding choice, so it belongs below the relevant nodes."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which says QA answers are generally short and Thorough Decoding is used there since the candidate set stays small and extra forward passes are affordable. Sentence 2 is also fully supported by node 2 in retrieval context, which covers longer outputs like Jeopardy and Open-MSMarco, notes that the hypothesis set |Y| can grow large, and explains that Fast Decoding is much more efficient while not hurting performance in those tasks."
+        },
+        "Contextual Relevancy": {
+          "score": 0.1702127659574468,
+          "passed": false,
+          "reason": "The score is 0.17 because most retrieved content is just unrelated table/results material that “does not address decoding strategy selection” and “does not explain why ‘Thorough Decoding’ is used for short QA versus ‘Fast Decoding’ for longer outputs.” However, a small portion is relevant: it says “Standard open-domain QA tasks typically consist of short, simple questions,” and that for “Open-MSMarco and Jeopardy question generation” the paper “uses the Fast Decoding approach for RAG-Sequence models, as Thorough Decoding did not improve performance,” which only partially matches the input."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stayed fully on topic and addressed the decoding tradeoff using the research papers without any irrelevant content. It is already at the highest score since nothing extraneous was included."
+        },
+        "Faithfulness": {
+          "score": 0.75,
+          "passed": true,
+          "reason": "The score is 0.75 because the actual output incorrectly ties Thorough Decoding to RAG-Sequence, even though the context only says Thorough Decoding is used for open-domain QA because answers are generally short and does not make that claim specific to RAG-Sequence. It also seems to miss that RAG-Sequence uses 50 retrieved documents for test results, so the response is mostly faithful but not fully precise."
+        }
+      }
+    },
+    {
+      "question": "Using Tbls 9/11 labels, classify the word-embedding output vs evidence and justify support level.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The output should be classified as **[Partially supported]**. [1][3]\n\nThe evidence says that word embeddings are mathematical representations of words or phrases in a vector space and that they allow similarities between words and context to be measured. [1] The output adds that they are useful for tasks such as sentiment analysis and text classification, but that extra claim is not supported in the provided evidence. [1]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all three nodes in retrieval contexts are relevant and appear in the right order: node 1 contains the key evidence that word embeddings are useful for NLP tasks like 'sentiment analysis' and 'text classification,' node 2 provides the evaluation rule for deciding support level, and node 3 defines the support labels '[Fully supported]' and '[Partially supported]'. Since there are no irrelevant nodes above any relevant ones, the ranking is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the expected output is fully attributable to the retrieval context: sentence 1 is directly supported by node 2 in retrieval context, which explicitly says the result is [Partially supported] and names sentiment analysis, next token prediction, and analogy detection while noting missing items like text classification and understanding synonyms; node 3 further supports the partial-support definition, and node 1 aligns with the broader word-embeddings/NLP-task framing. No sentence is left unsupported."
+        },
+        "Contextual Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieval context directly matches the task of judging evidence support, including guidance like \"Your task is to evaluate if the output is fully supported by the information provided in the evidence\" and the relevant labels such as \"[No support / Contradictory]\" and \"be considered a [Partially supported].\" It also aligns with the input’s focus on \"Using Tbls 9/11 labels, classify the word-embedding output vs evidence and justify support level.\""
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response is fully aligned with the request and stays focused on classifying the word-embedding output vs. evidence using the uploaded research papers. There are no irrelevant statements, so it cannot be improved on relevance, and it earns the highest score."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "When does unverifiable output need [Retrieval] vs fully evidence-grounded [Continue to Use Evidence]?\nAnswer using the uploaded research papers.",
+      "generated_answer": "If the output sentence can be fully verified solely by the evidence, respond with **[Continue to Use Evidence]**. [2]  \nIf additional information is needed to verify the output sentence, respond with **[Retrieval]**. [2]  \nIf the sentence does not require factual verification, respond with **[No Retrieval]**. [2]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top 3 nodes in the retrieval contexts are all relevant and correctly ordered: node 1 says to use \"[Retrieval]\" when \"additional information is needed to verify the output sentence,\" node 2 states that if the output can be verified solely with the evidence, respond with \"[Continue to Use Evidence]\" and otherwise use \"[Retrieval],\" and node 3 also concerns whether output is \"fully supported\" by evidence versus needing more information. Since there are no irrelevant nodes ranked above relevant ones, the precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 0.5,
+          "passed": false,
+          "reason": "The score is 0.50 because sentence 1 is supported by node 1 in retrieval context and node 2, which both clearly say to use [Retrieval] when additional information is needed and to judge whether the output can be fully verified by the evidence. However, sentence 2 is not fully attributable to node 1 or node 2 because they do not provide the exact quoted wording about “can be verified solely with the evidence” versus “additional information is needed,” so the match is only partial."
+        },
+        "Contextual Relevancy": {
+          "score": 0.75,
+          "passed": true,
+          "reason": "The score is 0.75 because the retrieval context does address the core decision rule—e.g., it says to determine whether an output sentence 'can be fully verified by evidence or needs further external verification' and 'we need to retrieve other evidence to verify whether the output is correct or not.' However, some parts are off-topic or noisy, such as 'word embeddings' and the fragment 'the', so the context is only mostly relevant, not perfectly aligned."
+        },
+        "Answer Relevancy": {
+          "score": 0.75,
+          "passed": true,
+          "reason": "The score is 0.75 because the response mostly addresses when to use [Retrieval] versus [Continue to Use Evidence] with the uploaded papers, but it includes an irrelevant formatting marker that does not help answer the question. It is still fairly relevant overall since the core guidance is on topic and aligned with the input."
+        },
+        "Faithfulness": {
+          "score": 0.8,
+          "passed": true,
+          "reason": "The score is 0.80 because the actual output incorrectly says each of the three response options is marked with [2], even though the context only lists [Continue to Use Evidence], [No Retrieval], and [Retrieval] without that [2] marking."
+        }
+      }
+    },
+    {
+      "question": "Contrast ReAct vs Act on ALFWorld/WebShop, incl. SR gains, score delta, and cross-task robustness.\nAnswer using the uploaded research papers.",
+      "generated_answer": "On ALFWorld, ReAct outperforms Act: the best ReAct trial reaches 71% average success rate, versus 45% for the best Act trial, a +26 percentage-point gain in SR. [1][2] ReAct also beats Act consistently across six controlled trials, with relative gains from 33% to 90% and averaging 62%, which suggests strong cross-trial robustness on this benchmark. [1] The paper also notes that even the worst ReAct trial (48%) exceeds the best trial of Act and BUTLER, reinforcing robustness on ALFWorld. [1]\n\nOn WebShop, ReAct again outperforms Act: ReAct gets a score of 66.6 and SR of 40.0, while Act gets a score of 62.3 and SR of 30.1. [2] That is a +4.3 score delta and a +9.9 percentage-point SR gain for ReAct over Act. [2] The paper describes this as “significantly better performance” with an absolute 10% improvement. [1]\n\nAcross both tasks, the evidence indicates ReAct is more robust than Act. [1] It improves on ALFWorld and WebShop, and on ALFWorld its advantage holds across all six controlled trials rather than relying on a single lucky prompt. [1][2]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the retrieval contexts are perfectly ordered: node 1 and node 2 in the retrieval contexts provide the exact ALFWorld and WebShop comparisons needed, including the quoted gains ('best ReAct trial achieves an average success rate of 71%' vs 'best Act (45%)' and 'Act 62.3 30.1' vs 'ReAct 66.6 40.0'), while node 3 in the retrieval contexts adds the cross-task robustness framing. There are no irrelevant nodes ranked above relevant ones, so nothing needs to be pushed lower; the top-ranked nodes already capture the core answer, which is why the score is maximal."
+        },
+        "Contextual Recall": {
+          "score": 0.75,
+          "passed": true,
+          "reason": "The score is 0.75 because sentence 1 is well supported by node(s) in retrieval context 1 and 2, which show ReAct beating Act on ALFWorld and WebShop with the stated raw results. Sentence 2 is only partially supported: node 1 and node 3 back the cross-task robustness idea and reasoning-based explanation, but the exact ALFWorld gain figures (+26 points, 58% relative improvement) are not explicitly stated in any node. Sentence 3 is likewise only partially supported by node 2, which contains the WebShop raw scores, while the exact score delta (+4.3) and SR gain (+9.9 points, 33% relative improvement) are not directly given."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8181818181818182,
+          "passed": true,
+          "reason": "The score is 0.82 because the context directly supports the requested ReAct-vs-Act comparison with concrete evidence like \"Results ReAct outperforms Act on both ALFWorld (Table 3) and Webshop (Table 4),\" plus SR and score details such as \"average success rate of 71%\" vs Act's \"45%\" and Webshop \"Score and success rate (SR) on Webshop\". However, some retrieved text is only tangential, e.g., \"trained with 1,012 human annotated trajectories\" and \"Published as a conference paper at ICLR 2023,\" so the context is strong but not perfectly focused on the exact cross-task robustness framing."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on contrasting ReAct vs Act on ALFWorld/WebShop, including SR gains, score delta, and cross-task robustness, with no irrelevant statements. It is maximally relevant and directly addresses the requested paper-based comparison."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "In the HotPotQA/FEVER question-only setup, which 3 Wikipedia API actions enable retrieval and answering?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The three Wikipedia API actions are `search[entity]`, `lookup[string]`, and `finish[answer]`. [1] In the HotPotQA/FEVER question-only setup, models receive only the question/claim and must use such external environment interactions to retrieve knowledge and support reasoning. [2]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the most relevant node in the retrieval contexts is ranked 1 and directly lists the needed Wikipedia API actions: \"search[entity]\", \"lookup[string]\", and \"finish[answer]\". The next relevant node at rank 2 adds supporting context about the \"question-only setup\" and \"interacting with a Wikipedia API\". The irrelevant node at rank 3 is appropriately ranked lower, since it only discusses \"Retrieval setup details\" with \"Contriever-MS MARCO\" and Wikipedia embeddings, which does not help answer which 3 actions enable retrieval and answering."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node(s) in retrieval context 1 and 2, which explicitly list the three Wikipedia API actions and their meanings: search[entity], lookup[string], and finish[answer]."
+        },
+        "Contextual Relevancy": {
+          "score": 0.29411764705882354,
+          "passed": false,
+          "reason": "The score is 0.29 because much of the context is off-topic, including statements about being \"significantly weaker than state-of-the-art lexical or neural retrievers\" and details like \"we randomly select 6 and 3 cases from the training,\" which do not answer the question. However, it does contain the key API actions: \"search[entity], lookup[string], and finish[answer],\" along with the note that models use a \"question-only setup\" and must retrieve knowledge via an external environment."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on the question and contains no irrelevant statements; it directly addresses the requested Wikipedia API actions for the HotPotQA/FEVER question-only setup."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output fully aligns with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Compare Table 5 LoRA setups: does adapting Wq+Wv outperform single-weight and all-weight variants overall?\nAnswer using the uploaded research papers.",
+      "generated_answer": "Yes. Table 5 says that adapting both **Wq and Wv** gives the **best performance overall** on WikiSQL and MultiNLI among the listed LoRA setups with the same number of trainable parameters. [3]\n\nIt also states that putting all the parameters into just **ΔWq** or **ΔWk** results in **significantly lower performance**, and that adapting **both Wq and Wv** is preferable to adapting a single type of weight with a larger rank. [3]\n\nThe evidence does not say that **Wq+Wv** strictly beats every possible “all-weight” configuration in every case, but among the setups shown in Table 5, **Wq+Wv is the best overall**. [3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 0.8333333333333333,
+          "passed": true,
+          "reason": "The score is 0.83 because the relevant retrieval context nodes are mostly ranked above the irrelevant one: node 1 directly says the comparison table shows \"Wq, Wv\" with stronger scores than single-weight setups, and node 3 explicitly concludes that \"Adapting both Wq and Wv gives the best performance overall.\" However, the score is not higher because node 2 is an irrelevant node placed between those two relevant nodes; it only mentions that LoRA is applied to \"Wq and Wv in most experiments for simplicity\" and gives the parameter formula, without answering the performance comparison. Since this irrelevant node is ranked above a relevant node, the ordering is good but not perfectly precise."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node(s) in retrieval context 1 and 3, which explicitly state that adapting both Wq and Wv gives the best overall performance, and node 3 provides the exact Table 5 values (WikiSQL 73.7 vs single-weight baselines 70.4/70.0/73.0/73.2; MultiNLI 91.3 vs all-weight 91.7)."
+        },
+        "Contextual Relevancy": {
+          "score": 0.6956521739130435,
+          "passed": false,
+          "reason": "The score is 0.70 because the retrieval context includes the core Table 5 comparison and directly relevant claims like \"Table 5: Validation accuracy...\" and \"Adapting both Wq and Wv gives the best performance overall,\" but it is diluted by many unrelated fragments such as \"the effect of rank r on model performance,\" \"Table 6,\" and \"AdapterDrop ... drops some adapter layers for greater efficiency.\""
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stayed fully on-topic and directly addressed the comparison of LoRA setups from the uploaded research papers, with no irrelevant statements to detract from relevance. Great job staying focused and complete."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Compare Table 6: optimal r for Wq vs Wq,Wv vs all attn weights; smallest competitive r?\nAnswer using the uploaded research papers.",
+      "generated_answer": "Table 6 shows that for **Wq alone**, performance peaks around **r = 4** on WikiSQL (70.5) and **r = 4** on MultiNLI (91.1), so a larger rank is needed than for the multi-weight settings. [1]\n\nFor **Wq, Wv**, performance is already strong at **r = 1** and stays competitive through the larger ranks; the table and text say that “a rank as small as one suffices for adapting both Wq and Wv” on these datasets. [1]\n\nFor **all attention weights** ({Wq, Wk, Wv, Wo}), the best or near-best results are also reached with very small ranks, with the table showing strong performance at **r = 1–4** and the text noting that LoRA performs competitively with a very small r. [1]\n\nSo the **smallest competitive r** is **1 for Wq, Wv and for all attention weights**, while **Wq alone needs a larger r, about 4, to be competitive**. [1]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top-ranked retrieval contexts all directly support the comparison: node 1 contains the exact Table 6 results for \"Wq\", \"Wq, Wv\", and \"Wq, Wk, Wv, Wo\" and notes that \"a rank as small as one suffices,\" node 2 reinforces that \"adapting both Wq and Wv gives the best performance overall,\" and node 3 explains why very small ranks can still work by saying the update matrix has a very small \"intrinsic rank.\" There are no irrelevant nodes ranked above relevant ones, so precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which directly shows Table 6 and the caption backing the claim that adapting more attention matrices works well with much smaller rank. Sentences 2-10 are also supported by node 1: the Wq row matches the WikiSQL values 68.8 at r=1 and 70.5 at r=4 plus MultiNLI 91.1 at r=4; the Wq,Wv row matches 73.4 at r=1, 73.8 at r=8, and 91.3 at r=1; and the Wq,Wk,Wv,Wo row matches 74.1 at r=1 and 91.7 at r=2 or r=4, so the smallest competitive r conclusions are all grounded in the same node."
+        },
+        "Contextual Relevancy": {
+          "score": 0.9047619047619048,
+          "passed": true,
+          "reason": "The score is 0.90 because the retrieval context directly answers the comparison with Table 6, including “Table 6: Validation accuracy...” and “To our surprise, a rank as small as one suffices for adapting both Wq and Wv... while training Wq alone needs a larger r.” The minor irrelevance comes from the unrelated “7.2” heading and the caveat about “tasks in a different language and retraining the entire model,” which do not affect the table comparison."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response is fully aligned with the input and contains no irrelevant statements, so it directly addresses the comparison of Table 6 and the smallest competitive r."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output fully aligns with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Identify the 4 ODQA datasets where RAG sets SOTA, incl. T5-comparable TQA split.\nAnswer using the uploaded research papers.",
+      "generated_answer": "RAG sets a new state of the art on four open-domain QA datasets: Natural Questions (NQ), TriviaQA (TQA), WebQuestions (WQ), and CuratedTrec (CT). [2] For TriviaQA, the T5-comparable evaluation is the TriviaQA Wiki test set. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all retrieved nodes in the retrieval contexts are relevant and perfectly ordered: node 1 quotes the four datasets ('Natural Questions (NQ)', 'TriviaQA (TQA)', 'WebQuestions (WQ)' and 'CuratedTrec (CT)') plus the T5-comparable TQA split detail; node 2 directly confirms that 'On all four open-domain QA tasks, RAG sets a new state of the art (only on the T5-comparable split for TQA)'; and node 3 further supports the TriviaQA split with 'the public TriviaQA Web Development split' and the T5 comparison note. There are no irrelevant nodes that should be ranked lower, so precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because node(s) in retrieval context 1 and 2 fully support sentence 1 by listing the four ODQA datasets and sentence 2 by stating that RAG sets a new state of the art on all four tasks, with the TQA T5-comparable split noted specifically. Great match!"
+        },
+        "Contextual Relevancy": {
+          "score": 0.3,
+          "passed": false,
+          "reason": "The score is 0.30 because most of the retrieval context is off-target, e.g. it talks about \"free-form, abstractive text generation,\" \"MSMARCO NLG task v2.1,\" and retriever/training details, which do not answer the question. However, it does include the key relevant evidence: \"We consider four popular open-domain QA datasets: Natural Questions (NQ), TriviaQA (TQA), WebQuestions (WQ), and CuratedTrec (CT),\" plus \"For TQA, to compare with T5, we also evaluate on the TQA Wiki test set\" and \"On all four open-domain QA tasks, RAG sets a new state of the art (only on the T5-comparable split for TQA).\""
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addresses the request with no irrelevant statements. It directly identifies the four ODQA datasets where RAG achieves SOTA, including the T5-comparable TQA split, so there is no basis for a higher or lower score."
+        },
+        "Faithfulness": {
+          "score": 0.5,
+          "passed": false,
+          "reason": "The score is 0.50 because the actual output misstates the TriviaQA evaluation split: the context says the T5-comparable split is the public TriviaQA Web Development split, but it instead refers to the official TriviaQA Wikipedia test set and says Févry et al. follow Roberts et al.'s convention."
+        }
+      }
+    },
+    {
+      "question": "If retrieval supervision vanished, how would FEVER work, and what labels would RAG predict?\nAnswer using the uploaded research papers.",
+      "generated_answer": "If retrieval supervision vanished, FEVER would still be used as a claim-classification task with direct training on claim-pair inputs, and the model would not rely on supervision for retrieved evidence. The paper says this is important because in real-world settings retrieval supervision may not be available, and models that do not require it are applicable to a wider range of tasks. [1]\n\nFor FEVER, RAG maps the class labels to single output tokens and predicts either the standard 3-way labels: supports, refutes, and not enough info, or the 2-way labels: supports and refutes. In both settings, it reports label accuracy. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 0.8333333333333333,
+          "passed": true,
+          "reason": "The score is 0.83 because the first node in the retrieval contexts is relevant and directly addresses FEVER with \"do not use supervision on retrieved evidence\" and \"directly train with claim-class pairs,\" while the third node also supports the FEVER discussion by noting that \"BM25 performs best\" and FEVER claims are \"heavily entity-centric.\" It is not higher because the second node is an irrelevant node ranked above the third relevant node; although it discusses \"BART for Jeopardy question generation\" and \"generation diversity,\" it does not help answer the FEVER/RAG labels question, so it should have been ranked lower than the relevant node in the retrieval contexts."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because sentence 1 is fully supported by node 1 in retrieval context, which states RAG is trained on claim-class pairs without supervision on retrieved evidence; sentence 2 is supported by node 1’s FEVER single-token labels supports/refutes/not enough info; sentence 3 is supported by node 1’s 2-way supports/refutes variant; and sentence 4 is supported by node 1’s note that retrieval supervision often isn’t available in real-world applications. No sentence is left unsupported."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5652173913043478,
+          "passed": false,
+          "reason": "The score is 0.57 because the context does include directly relevant FEVER/RAG details like \"FEVER class labels (supports, refutes, or not enough info)\" and that the method \"does not use supervision on retrieved evidence,\" but much of the surrounding material is off-topic, such as \"Results for RAG,\" \"BART for Jeopardy question generation,\" and \"generation diversity,\" so it only partially answers how FEVER would work without retrieval supervision and what labels RAG would predict."
+        },
+        "Answer Relevancy": {
+          "score": 0.625,
+          "passed": false,
+          "reason": "The score is 0.62 because the answer appears to address the FEVER/RAG topic, but it is dragged down by generic, off-target statements and an inaccurate label claim. It is not higher because it includes broad motivation rather than staying tightly grounded in the papers, and it misstates the FEVER/RAG label setup. It still earns a moderate score because it remains somewhat related to the question about how FEVER works without retrieval supervision and what labels RAG predicts."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "What do ALFWorld/Webshop results show about reasoning-guided actions vs action-only prompting in ReAct?\nAnswer using the uploaded research papers.",
+      "generated_answer": "The ALFWorld and Webshop results show that adding sparse reasoning to action-only prompting improves ReAct’s performance. On ALFWorld, ReAct outperforms Act: the best ReAct trial reaches 71% average success rate, compared with 45% for the best Act trial, and the advantage is consistent across six controlled trials with relative gains from 33% to 90% (average 62%). [1] The paper also reports that Act without thoughts often fails to decompose goals into subgoals or track the environment state, while ReAct does better by using reasoning. [1]\n\nOn Webshop, one-shot Act prompting already performs about on par with IL and IL+RL methods, but ReAct with additional sparse reasoning achieves a significant absolute 10% improvement over the previous best success rate. [1][3] The paper explains that ReAct is more likely to identify instruction-relevant products and options by reasoning about noisy observations before acting. [3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the top 3 nodes in the retrieval contexts are all relevant and already rank the needed evidence highest: node 1 says \"ReAct outperforms Act\" on ALFWorld, with the best ReAct trial at 71% vs the best Act at 45%; node 2 gives the Webshop result that \"with additional sparse reasoning, ReAct achieves significantly better performance\" with an absolute 10% improvement; and node 3 explains that Act \"fails to correctly decompose goals\" and \"loses track of the current state.\" Since there are no irrelevant nodes ranked above these relevant nodes, the ranking is perfectly precise."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because every sentence in the expected output is fully supported by the nodes in retrieval context: sentence 1 is directly matched by node 1 stating ReAct outperforms Act on both ALFWorld and Webshop; sentence 2 is backed by node 1 with the exact ALFWorld figures (71% vs 45%, and 48% still above Act’s best) plus the note about decomposing goals and tracking state; sentence 3 is supported by nodes 1 and 3 with the Webshop 40.0 vs 30.1 result and the 10% improvement; and sentence 4 is covered by nodes 1 and 3 describing better planning, state tracking, and connecting noisy observations to actions. Great coverage overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.7647058823529411,
+          "passed": true,
+          "reason": "The score is 0.76 because most of the relevant context directly answers the question, including that \"ReAct outperforms Act on both ALFWorld (Table 3) and Webshop (Table 4)\" and that \"Act prompts are constructed using the same trajectories, but without thoughts,\" showing the benefit of reasoning-guided actions. However, some retrieved text is only loosely related or off-topic, such as \"The phrase 'method additionally trained with 10,587 training instructions' is about training data setup\" and the broader note that ReAct is \"the first demonstration of combined reasoning and action,\" which do not specifically address the ALFWorld/Webshop comparison."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response stays fully focused on the ALFWorld/Webshop comparison between reasoning-guided actions and action-only prompting in ReAct, with no irrelevant statements."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output fully aligns with the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Compare ReAct vs CoT on HotpotQA/FEVER: Table 1 metrics, hallucination, groundedness, key failure modes.\nAnswer using the uploaded research papers.",
+      "generated_answer": "On Table 1, ReAct scores 27.4 EM on HotpotQA and 60.9 accuracy on FEVER, while CoT scores 29.4 EM on HotpotQA and 56.3 accuracy on FEVER. [3]\n\nFor hallucination on HotpotQA, Table 2 shows CoT has a much higher hallucination rate than ReAct in failure mode: 56% for CoT versus 0% for ReAct. [2] In success mode, CoT also has a higher false positive rate than ReAct: 14% versus 6%. [2]\n\nThe paper says ReAct’s problem-solving trajectory is “more grounded, fact-driven, and trustworthy” because it has access to an external knowledge base. [1] It also says that interleaving reasoning, action, and observation improves groundedness and trustworthiness. [1]\n\nKey failure modes differ as follows: for ReAct, the main failure modes are reasoning error (47%), search result error (23%), and label ambiguity (29%); for CoT, the main failure modes are reasoning error (16%), hallucination (56%), and label ambiguity (28%). [2]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all three nodes in the retrieval contexts are relevant and are ranked correctly: node 1 directly supports the Table 1 comparison with \"CoT (Wei et al., 2022) 29.4 56.3\" and \"ReAct 27.4 60.9\"; node 2 follows with the hallucination/groundedness evidence, including \"Hallucination is a serious problem for CoT\" and \"ReAct is more grounded, fact-driven, and trustworthy\"; and node 3 provides the key failure modes with \"Reasoning error 47% vs 16%\" and \"Hallucination 0% vs 56%\". There are no irrelevant nodes placed above relevant ones, so precision is perfect."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all sentences in the expected output are supported by the retrieval context: sentence 1 matches node 1 and node 3 on Table 1 (HotpotQA EM 29.4 vs 27.4; FEVER Acc 60.9 vs 56.3), sentence 2 is backed by node 1’s claim that ReAct is more grounded and uses external knowledge, sentences 3-4 align with node 1 and node 2 on the HotpotQA human-analysis false positives and hallucination rates, sentence 5 is supported by node 1 and node 2 on ReAct’s failure modes, sentence 6 matches node 1 and node 2 on CoT’s failure modes, and sentence 7 is consistent with node 1 and node 3 on ReAct being more trustworthy/grounded and FEVER benefiting from retrieval. Great retrieval coverage throughout."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8478260869565217,
+          "passed": true,
+          "reason": "The score is 0.85 because most of the context directly supports the comparison, including Table 1 results like \"ReAct 27.4 / 60.9\" vs. \"CoT 29.4 / 56.3\" and the failure analysis showing \"Hallucination is a serious problem for CoT\" with \"56%\" vs. ReAct's \"0%\". However, some retrieved items are irrelevant metadata or headings such as \"Published as a conference paper at ICLR 2023,\" \"Type,\" and \"Definition,\" so the context is highly relevant but not perfect."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully addressed the requested comparison using the research paper content, covering Table 1 metrics, hallucination, groundedness, and key failure modes without any irrelevant statements. It cannot be higher because the score is already perfect."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "Synthesize retrieval-judgment rules, 3-way evidence labels via word-embeddings, and zero-shot dataset instructions.\nAnswer using the uploaded research papers.",
+      "generated_answer": "The evidence says that for a given output sentence, if it can be fully verified by the evidence, the label is **[Continue to Use Evidence]**; if it does not require factual verification, the label is **[No Retrieval]**; and if more information is needed, the label is **[Retrieval]**. [2]\n\nIt also says that the demonstration for the Retrieve aspect notes an output about the **applications of word embeddings** needs retrieval because the evidence only covers the **definitions of word embeddings and how they work**. [1]\n\nThe provided evidence does **not** contain enough information to synthesize a complete answer about “zero-shot dataset instructions” beyond these retrieval-judgment rules and the word-embeddings example. [1][2][3]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked first and second, capturing the needed synthesis of retrieval-judgment rules, the three evidence labels, and zero-shot instructions. The irrelevant node in retrieval contexts is ranked third, which is appropriate because it only contains bibliographic references like \"Gautier Izacard...\" and \"Mandar Joshi...\" and does not support the requested synthesis, so it should be placed below the useful nodes."
+        },
+        "Contextual Recall": {
+          "score": 0.0,
+          "passed": false,
+          "reason": "The score is 0.00 because sentence 1 cannot be attributed to the node(s) in retrieval context: nodes 1-3 only discuss retrieval/output verification and word-embedding examples, while the expected output’s specific concepts (retrieval-judgment rules, the 3-way evidence labels, and zero-shot dataset instructions like ARC-C, PubHealth, Bio Generation, and ASQA) are not present there."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5333333333333333,
+          "passed": false,
+          "reason": "The score is 0.53 because the context partially matches the task by providing retrieval-judgment guidance such as \"Your task is to determine whether the information in the output sentence can be fully verified\" and the three labels \"[Continue to Use Evidence]\", \"[No Retrieval]\", and \"[Retrieval].\" However, much of the context is still off-topic, including paper citations and metadata like \"Few-shot learning with retrieval augmented language models\" and \"forum?id=jKN1pXi7b0.\", which do not provide the requested synthesis of rules, 3-way evidence labels via word-embeddings, or zero-shot dataset instructions."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response fully matches the request and stays on-topic with no irrelevant statements. It directly addresses the synthesis of retrieval-judgment rules, 3-way evidence labels via word embeddings, and zero-shot dataset instructions as asked."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions; the actual output aligns perfectly with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "In the excerpt, name all 3 labels and match each to its verification case.\nAnswer using the uploaded research papers.",
+      "generated_answer": "I couldn't find anything relevant to that question. Try rephrasing it or uploading more papers.",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant retrieval context nodes are ranked at the top: node 1 and node 2 both directly support identifying the three labels and their verification cases, with phrases like \"evaluation labels\" and \"fact-verification setting\". The irrelevant node 3 is already placed lower, and its content about \"examples and reflection tokens\" does not clearly name the labels or map them to cases, so it appropriately stays below the useful nodes."
+        },
+        "Contextual Recall": {
+          "score": 0.3333333333333333,
+          "passed": false,
+          "reason": "The score is 0.33 because sentence 1 is supported by node 1 in retrieval context, which explicitly says “the answer is 1,417.” However, sentence 2 is not attributable to nodes 1-3 because none mention the hotel question or the Cirque du Soleil hotel, and sentence 3 is also unsupported since nodes 1-3 do not contain the specific “The 3 labels are...” classification statement; they only cover unrelated paper excerpts."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5263157894736842,
+          "passed": false,
+          "reason": "The score is 0.53 because the retrieval context contains some relevant verification-task material, such as FEVER: it \"requires classifying whether a natural language claim is supported or refuted by Wikipedia, or whether there is not enough information,\" and \"the task requires retrieving evidence... and then reasoning... to classify whether the claim is true, false, or unverifiable.\" However, much of the context is still off-target or incomplete for the prompt’s request to \"name all 3 labels and match each to its verification case,\" including truncated passages and unrelated examples like \"HotpotQA label: 2,664\" and \"the labels themselves could be outdated.\""
+        },
+        "Answer Relevancy": {
+          "score": 0.0,
+          "passed": false,
+          "reason": "The score is 0.00 because the response completely missed the requested task: it did not identify the 3 labels or match them to their verification cases from the excerpt. Instead, it gave generic refusal/rephrasing text and asked for more papers, so it is unrelated to answering the input."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully aligned with the retrieval context. Great job!"
+        }
+      }
+    },
+    {
+      "question": "If BART & RAG answered MS-MARCO/Jeopardy, which seems more factual/specific, and why?\nAnswer using the uploaded research papers.",
+      "generated_answer": "For Jeopardy question generation, RAG seems more factual and more specific than BART. In the human evaluation, BART was judged more factual in only 7.1% of cases, while RAG was more factual in 42.7%; similarly, BART was more specific in 16.8% of cases, while RAG was more specific in 37.4%. [2] The paper says this “clearly demonstrat[es] the effectiveness of RAG on the task” and notes that RAG generations are “more specific by a large margin.” [2]\n\nFor MS-MARCO, the evidence here does not provide a direct human factuality/specificity comparison between BART and RAG. [1][3] It only says that RAG outperforms BART on Open MS-MARCO NLG and that the authors qualitatively find RAG models “hallucinate less” and generate “factually correct text more often than BART.” [3] It also shows a diversity table for MSMARCO, but not factuality or specificity ratings. [1]",
+      "passed": false,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant nodes in retrieval contexts are ranked at the top: node 1 says RAG is more factual on MS-MARCO since it “hallucinate[s] less and generate[s] factually correct text more often than BART,” and node 2 says for Jeopardy that “BART was more factual than RAG in only 7.1% of cases, while RAG was more factual in 42.7% of cases,” with RAG generations “more specific by a large margin.” The irrelevant node 3 is already ranked below these, and while it mentions Jeopardy data, its focus on a different issue makes it less useful than the top nodes for answering which model is more factual/specific."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because every sentence in the expected output is supported by node(s) in retrieval context: sentence 1 is backed by node 1’s MS-MARCO claim that RAG hallucinates less and is more factually correct than BART, sentence 2 is supported by node 2’s Jeopardy evaluation showing RAG was more factual than BART (42.7% vs 7.1%), sentence 3 is also supported by node 2’s statement that RAG generations are more specific by a large margin, sentence 4 is supported by node 2’s example-based evidence of more precise, grounded outputs, and sentence 5 is supported by nodes 1 and 2 via RAG’s ability to retrieve and combine relevant document content."
+        },
+        "Contextual Relevancy": {
+          "score": 0.5,
+          "passed": false,
+          "reason": "The score is 0.50 because much of the retrieval context is off-topic, focusing on things like \"tri-gram diversity ratios\" and \"ablation results\" rather than the question. However, it does contain directly relevant evidence that \"RAG is better than BART for factuality and specificity\" and that \"RAG models hallucinate less and generate factually correct text more often than BART,\" which supports the comparison asked."
+        },
+        "Answer Relevancy": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the response is fully aligned with the input, addressing which of BART or RAG seems more factual/specific for MS-MARCO/Jeopardy and grounding the answer in the uploaded research papers, with no irrelevant content."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output appears fully faithful to the retrieval context."
+        }
+      }
+    },
+    {
+      "question": "Compare RAG-Token vs RAG-Seq on open-domain QA and Jeopardy, vs BART/DPR/REALM/T5(+SSM).\nAnswer using the uploaded research papers.",
+      "generated_answer": "On open-domain QA, RAG-Sequence is slightly better than RAG-Token on NQ, TQA, and CT, while RAG-Token is slightly better on WQ. [3] Specifically, RAG-Seq scores 44.5 on NQ vs 44.1 for RAG-Token, 56.8/68.0 on TQA vs 55.2/66.1 for RAG-Token, 45.2 on WQ vs 45.5 for RAG-Token, and 52.2 on CT vs 50.0 for RAG-Token. [3] Both RAG models outperform REALM and DPR on NQ and TQA, and outperform REALM on WQ and CT, while DPR is only reported for NQ, TQA, and WQ in the table. [3] Compared with the closed-book T5-11B models, both RAG models are better on NQ and WQ, and also better on TQA in the reported test-set numbers. [3]\n\nFor Jeopardy question generation, RAG-Token is better than RAG-Sequence on Q-BLEU-1, with 22.2 vs 21.4 in the test scores table. [3] The paper also says RAG-Token performs better than RAG-Sequence on Jeopardy question generation, and that both RAG models outperform BART on Q-BLEU-1. [1] In the human evaluation, RAG generations were judged more factual than BART in 42.7% of cases, while BART was more factual in 7.1% of cases; RAG was also judged more specific by a large margin. [1][2] The Jeopardy table reports BART at 15.1 / 19.7 and RAG-Token at 17.3 / 22.2, so RAG-Token is ahead of BART on both listed Jeopardy metrics, while RAG-Sequence is 14.7 / 21.4. [3]\n\nAgainst T5(+SSM), the open-domain QA table shows T5-11B at 34.5 on NQ and 37.4 on WQ, with T5-11B+SSM at 36.6 on NQ and 44.7 on WQ; both RAG models exceed those scores on NQ and WQ. [3] On TQA, the table reports 50.1 for T5-11B+SSM and 50.1/60.5 format for T5-11B+SSM, while RAG-Token and RAG-Seq are 55.2/66.1 and 56.8/68.0 respectively, so both RAG models are higher in the reported TQA numbers. [3]\n\nThe papers do not provide a direct DPR/REALM/T5 comparison for Jeopardy question generation, beyond the reported BART and RAG results. [1][3]",
+      "passed": true,
+      "metric_scores": {
+        "Contextual Precision": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because the relevant retrieval contexts are ranked perfectly: node 1 and node 2 contain the Jeopardy comparison details, and node 3 provides the open-domain QA results, so all needed evidence appears in the top-ranked nodes with no irrelevant nodes placed above them."
+        },
+        "Contextual Recall": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because all sentences are fully supported by node(s) in retrieval context: sentence 1 is backed by node 1 showing both RAG variants outperform BART-style closed-book and prior open-book systems overall; sentence 2 is supported by node 1 and node 3 with the QA results showing RAG-Seq usually edges RAG-Token, with the noted WQ exception; sentence 3 is supported by node 3, which gives the Jeopardy Q-BLEU-1 scores where RAG-Token beats RAG-Seq and both beat BART; and sentence 4 is supported by node 2, which reports the human evaluation favoring RAG for factuality and specificity. Great coverage overall."
+        },
+        "Contextual Relevancy": {
+          "score": 0.8823529411764706,
+          "passed": true,
+          "reason": "The score is 0.88 because most of the retrieved material directly supports the comparison request, e.g. \"Table 1 presents open-domain QA test scores for NQ, TQA, WQ, and CT comparing Closed Book, REALM, DPR, RAG-Token, and RAG-Seq\" and \"Table 2 presents generation and classification test scores for Jeopardy, MS-MARCO, FEVER-3, and FEVER-2 comparing BART, RAG-Token, and RAG-Seq.\" A small portion is irrelevant, such as the incomplete fragment \"When generating “Sun”, the posterior is high for document 2 which mentions “The\" and the unrelated note that \"FEVER being a classification task is unrelated.\""
+        },
+        "Answer Relevancy": {
+          "score": 0.8709677419354839,
+          "passed": true,
+          "reason": "The score is 0.87 because the answer is largely focused on the requested comparison of RAG-Token vs RAG-Seq against BART, DPR, REALM, and T5(+SSM) on open-domain QA and Jeopardy, but it includes a few extra interpretive or table-specific remarks that are not essential to the direct performance comparison. It is still high because the core response addresses the paper-based results, just not perfectly concisely or exclusively."
+        },
+        "Faithfulness": {
+          "score": 1.0,
+          "passed": true,
+          "reason": "The score is 1.00 because there are no contradictions, so the actual output aligns fully with the retrieval context."
+        }
+      }
+    }
+  ],
+  "skipped_questions": []
+}
