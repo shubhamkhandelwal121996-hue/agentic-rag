@@ -12,3 +12,5 @@ wheels/
 .env
 .env.*
 !.env.example
+# PaperMind chat history
+.papermind/
