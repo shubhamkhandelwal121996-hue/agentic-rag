@@ -186,26 +186,4 @@ Update the six absolute PDF paths in the evaluation script (`DOCUMENT_PATHS`) to
 - Add automated tests, CI, and deployment configuration.
 - Provide configurable retrieval settings and optional conversation summarization.
 
-## 🔐 Security and data notes
-
-This application sends relevant content to external services such as OpenAI, Qdrant Cloud, and Tavily. Avoid uploading confidential papers without reviewing the providers' data policies. Local chat JSON, SQLite checkpoint files, cached embeddings, and credentials should be excluded from version control.
-
-Suggested `.gitignore` entries:
-
-```gitignore
-.env
-.env.*
-!.env.example
-.venv/
-__pycache__/
-*.pyc
-.papermind/
-**/embedding_cache/
-*.db
-*.db-shm
-*.db-wal
-```
-
----
-
 **PaperMind** — Explore research papers, retrieve supporting evidence, and investigate how scientific findings evolve.
