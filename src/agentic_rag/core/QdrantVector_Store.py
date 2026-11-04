@@ -43,7 +43,6 @@ embeddings = CacheBackedEmbeddings.from_bytes_store(
     key_encoder="blake2b",
 )
 
-
 # ── Qdrant Client ───────────────────────────────────────────────────────────
 
 qdrant_client = QdrantClient(
@@ -70,6 +69,20 @@ def get_qdrant_vectorstore(session_id: str) -> QdrantVectorStore:
                 size=EMBEDDING_DIM,
                 distance=models.Distance.COSINE,
             ),
+        )
+
+    # ── NEW: Create metadata.title payload index ───────────────────────────
+    # Required for exact-match metadata filtering in Qdrant Cloud.
+    # Also handles collections created before metadata filtering was added.
+
+    collection_info = qdrant_client.get_collection(collection_name)
+
+    if "metadata.title" not in (collection_info.payload_schema or {}):
+        qdrant_client.create_payload_index(
+            collection_name=collection_name,
+            field_name="metadata.title",
+            field_schema=models.PayloadSchemaType.KEYWORD,
+            wait=True,
         )
 
     return QdrantVectorStore(
