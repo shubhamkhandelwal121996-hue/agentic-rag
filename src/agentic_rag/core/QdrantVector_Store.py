@@ -71,7 +71,6 @@ def get_qdrant_vectorstore(session_id: str) -> QdrantVectorStore:
             ),
         )
 
-    # ── NEW: Create metadata.title payload index ───────────────────────────
     # Required for exact-match metadata filtering in Qdrant Cloud.
     # Also handles collections created before metadata filtering was added.
 
