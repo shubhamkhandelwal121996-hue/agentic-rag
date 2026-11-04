@@ -19,7 +19,10 @@ from langchain_core.tools import InjectedToolCallId, tool
 from langgraph.graph import END, MessagesState, StateGraph, START
 from langgraph.prebuilt import InjectedState, ToolNode
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
-from agentic_rag.core.QdrantVector_Store import retrieve_documents as VectorStore_search
+from agentic_rag.core.QdrantVector_Store import (
+    retrieve_documents as VectorStore_search,
+    list_research_papers,
+)
 
 load_dotenv()
 
@@ -169,6 +172,7 @@ def ResearchPaper_VectorStore(
     session_id: Annotated[str, InjectedState("session_id")],
     existing_docs: Annotated[list, InjectedState("retrieved_docs")],
     tool_call_id: Annotated[str, InjectedToolCallId],
+    title: Annotated[str | None, Field(description="Exact title of a specific uploaded paper, or None to search all uploaded papers")] = None,
 ) -> Command:
     """Research paper vector store containing the uploaded papers.
 
@@ -177,7 +181,12 @@ def ResearchPaper_VectorStore(
     Do NOT use it for current events, recent developments, or anything that
     would not appear in the uploaded papers; use the web_search tool for those."""
 
-    documents = VectorStore_search(query=query, session_id=session_id, k=3)
+    # Validate the title before applying the exact-match Qdrant metadata filter.
+    if title is not None and title not in list_research_papers(session_id):
+        msg = f"The requested paper title is not in the uploaded papers: {title}"
+        return Command(update={"messages": [ToolMessage(content=msg, tool_call_id=tool_call_id)]})
+
+    documents = VectorStore_search(query=query, session_id=session_id, k=3, title=title)
 
     if not documents:
         msg = "No relevant passages were found in the uploaded papers."
@@ -239,6 +248,7 @@ Your only job is to collect the information needed to answer the user's question
 Searches the research papers uploaded in this session.
 Parameters you control:
 - query: a search phrase that matches how the papers would word the answer
+- title: optional exact uploaded paper title for metadata filtering
 </ResearchPaper_VectorStore>
 
 <web_search>
@@ -283,8 +293,19 @@ def agent_node(state: RAGState) -> dict:
     if not history:
         history = [HumanMessage(content=search_query)]
 
+    # Supply the exact uploaded titles so the agent can choose a valid filter.
+    available_titles = list_research_papers(state["session_id"])
+    title_instructions = (
+        "\nAvailable uploaded research paper titles: " + repr(available_titles) +
+        "\nWhen the user explicitly requests a specific uploaded paper, "
+        "pass its exact title as the ResearchPaper_VectorStore title argument. "
+        "Choose only a title from this list. If no specific paper is requested "
+        "or the intended paper is ambiguous, omit title (search all papers). "
+        "Do not invent a paper title."
+    )
+
     result = llm_with_tools.invoke(
-        [{"role": "system", "content": RETRIEVE_SYSTEM_PROMPT}, *history]
+        [{"role": "system", "content": RETRIEVE_SYSTEM_PROMPT + title_instructions}, *history]
     )
     return {"messages": [result]}
 
