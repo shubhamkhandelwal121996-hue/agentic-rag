@@ -20,7 +20,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logger = logging.getLogger(__name__)
 
-# ----------------------------------HTTP requests and URL validation----------------------------------------- #
+# ---------------------------------- Configuration and Constants ---------------------------------- #
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 150
 
